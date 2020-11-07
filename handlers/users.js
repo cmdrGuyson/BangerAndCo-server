@@ -1,7 +1,6 @@
-const { request } = require("express");
-const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
-
+const jwt = require("jsonwebtoken");
+const { JWT_SECRET } = require("../config/env.json");
 const User = require("../models/user");
 
 const {
@@ -9,7 +8,7 @@ const {
   validateLoginData,
 } = require("../utils/validators");
 
-//Register user
+/* REGISTER USER */
 exports.signup = async (request, response) => {
   //Create new user object from user request
   const newUser = {
@@ -17,7 +16,6 @@ exports.signup = async (request, response) => {
     lastName: request.body.lastName,
     email: request.body.email,
     password: request.body.password,
-    confirmPassword: request.body.confirmPassword,
     NIC: request.body.NIC,
     DLN: request.body.DLN,
     contactNumber: request.body.contactNumber,
@@ -27,14 +25,8 @@ exports.signup = async (request, response) => {
     role: "user",
   };
 
-  //Validate signup data using utilities
-  //const { valid, errors } = validateSignupData(newUser);
-
   //Hash password
   newUser.password = await bcrypt.hash(newUser.password, 6);
-
-  //If user input is invalid send error response
-  //if (!valid) return response.status(400).json(errors);
 
   try {
     const user = await User.create(newUser);
@@ -43,8 +35,40 @@ exports.signup = async (request, response) => {
     return response.json(user);
   } catch (error) {
     console.log(error);
-    return response.status(500).json({ error: error });
+    return response.status(500).json({ error });
   }
 };
 
-//User login
+/* USER LOGIN */
+exports.login = async (request, response) => {
+  const { email, password } = request.body;
+  let errors = {};
+  try {
+    if (!email || email.trim() === "") errors.email = "Email must not be empty";
+    if (!password || password === "")
+      errors.password = "Password must not be empty";
+
+    if (Object.keys(errors).length > 0)
+      return response.status(400).json({ error: errors });
+
+    const user = await User.findOne({ email: email });
+
+    if (!user) return response.status(404).json({ error: "User not found" });
+
+    //Check password
+    const correctPassword = await bcrypt.compare(password, user.password);
+
+    if (!correctPassword) {
+      errors.password = "password is incorrect";
+      response.status(400).json({ error: errors });
+    }
+
+    //Generate JWT
+    user.token = jwt.sign({ email }, JWT_SECRET, { expiresIn: 60 * 60 });
+
+    return response.json(user);
+  } catch (error) {
+    console.log(error);
+    return response.status(500).json({ error });
+  }
+};

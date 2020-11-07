@@ -12,10 +12,11 @@ app.use(express.json());
 /* Log HTTP requests */
 app.use(morgan("dev"));
 
-const { signup } = require("./handlers/users");
+const { signup, login } = require("./handlers/users");
 
 /* USER ROUTES */
 app.post("/signup", signup);
+app.post("/login", login);
 
 const port = process.env.PORT || 5000;
 const server = http.createServer(app);
