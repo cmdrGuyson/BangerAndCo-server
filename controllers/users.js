@@ -1,5 +1,7 @@
 const bcrypt = require("bcrypt");
+const { request, response } = require("express");
 const jwt = require("jsonwebtoken");
+
 const { JWT_SECRET } = require("../config/env.json");
 const User = require("../models/user");
 
@@ -22,13 +24,17 @@ exports.signup = async (request, response) => {
     dateOfBirth: request.body.dateOfBirth,
     isBlacklisted: false,
     isPremiumCustomer: false,
+    isVerified: false,
     role: "user",
   };
 
-  //Hash password
-  newUser.password = await bcrypt.hash(newUser.password, 6);
+  console.log(request);
 
   try {
+    //Hash password
+    newUser.password = await bcrypt.hash(newUser.password, 6);
+
+    //Create new user object in database
     const user = await User.create(newUser);
 
     //Send user object as response
@@ -64,11 +70,18 @@ exports.login = async (request, response) => {
     }
 
     //Generate JWT
-    user.token = jwt.sign({ email }, JWT_SECRET, { expiresIn: 60 * 60 });
+    let token = jwt.sign({ email }, JWT_SECRET, { expiresIn: 60 * 60 });
 
-    return response.json(user);
+    return response.json({ token });
   } catch (error) {
     console.log(error);
     return response.status(500).json({ error });
   }
+};
+
+/* UPLOAD DRIVING LICENSE IMAGE */
+exports.uploadLicenseImage = (request, response) => {
+  const fileName = request.file.filename;
+
+  return response.json({ filename });
 };

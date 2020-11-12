@@ -68,6 +68,16 @@ const userSchema = new Schema(
       type: Boolean,
       required: true,
     },
+    isVerified: {
+      type: Boolean,
+      required: true,
+    },
+    licenseImageURL: {
+      type: String,
+    },
+    alternateIdentificationImageURL: {
+      type: String,
+    },
   },
   { timestamps: true }
 );

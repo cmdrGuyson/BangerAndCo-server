@@ -9,14 +9,18 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+app.use(express.static(__dirname + "/data"));
+
 /* Log HTTP requests */
 app.use(morgan("dev"));
 
-const { signup, login } = require("./handlers/users");
+const { uploadLicenseImageMW } = require("./middleware/imageUpload");
+const { signup, login, uploadLicenseImage } = require("./controllers/users");
 
 /* USER ROUTES */
 app.post("/signup", signup);
 app.post("/login", login);
+app.post("/licenseImage", uploadLicenseImageMW, uploadLicenseImage);
 
 const port = process.env.PORT || 5000;
 const server = http.createServer(app);
