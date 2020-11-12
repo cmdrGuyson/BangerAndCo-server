@@ -11,12 +11,14 @@ const {
   login,
   uploadLicenseImage,
   uploadAlternateIDImage,
+  getUsers,
 } = require("./controllers/users");
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
+
 /* Log HTTP requests */
 app.use(morgan("dev"));
 
@@ -25,8 +27,9 @@ app.use(express.static(__dirname + "/data"));
 /* USER ROUTES */
 app.post("/signup", signup);
 app.post("/login", login);
-app.post("/licenseImage", auth, uploadLicenseImage);
-app.post("/alternateIDImage", auth, uploadAlternateIDImage);
+app.post("/licenseImage", auth(), uploadLicenseImage);
+app.post("/alternateIDImage", auth(), uploadAlternateIDImage);
+app.get("/users", auth("admin"), getUsers);
 
 const port = process.env.PORT || 5000;
 const server = http.createServer(app);

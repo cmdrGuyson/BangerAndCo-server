@@ -3,7 +3,7 @@ const { JWT_SECRET } = require("../config/env.json");
 
 const User = require("../models/user");
 
-module.exports = async (request, response, next) => {
+module.exports = (admin) => async (request, response, next) => {
   let token;
   if (
     //Check if bearer token exists
@@ -26,10 +26,26 @@ module.exports = async (request, response, next) => {
   //If token is not succesfully decoded
   if (!auth_token) return response.status(403).json({ error: "Unauthoraized" });
 
-  //Check if user exists
-  const user = await User.findOne({ email: auth_token.email });
+  let user;
 
+  try {
+    //Check if user exists
+    user = await User.findOne({ email: auth_token.email })
+      .select(["-password"])
+      .orFail();
+  } catch (error) {
+    return response.status(500).json({ error });
+  }
+
+  //If user doesnt exist send error response
   if (!user) return response.status(403).json({ error: "Unauthoraized" });
+
+  //If using as admin authorization middleware. check if user is admin
+  if (admin) {
+    if (user.role !== "admin") {
+      return response.status(403).json({ error: "Unauthoraized" });
+    }
+  }
 
   request.user = user;
 

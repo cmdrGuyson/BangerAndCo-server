@@ -40,7 +40,6 @@ exports.signup = async (request, response) => {
     //Send user object as response
     return response.json(user);
   } catch (error) {
-    console.log(error);
     return response.status(500).json({ error });
   }
 };
@@ -134,7 +133,6 @@ exports.uploadAlternateIDImage = async (request, response) => {
           .status(500)
           .json({ error: { message: "File not found" } });
       }
-      //Set file location as URL in user object
 
       try {
         //Find user from database
@@ -154,4 +152,14 @@ exports.uploadAlternateIDImage = async (request, response) => {
       }
     }
   });
+};
+
+/* GET ALL USERS */
+exports.getUsers = async (request, response) => {
+  try {
+    let users = await User.find({ role: "user" }).select(["-password"]);
+    return response.status(200).json({ users });
+  } catch (error) {
+    return response.status(500).json({ error });
+  }
 };
