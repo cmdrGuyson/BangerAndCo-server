@@ -75,7 +75,7 @@ const userSchema = new Schema(
     licenseImageURL: {
       type: String,
     },
-    alternateIdentificationImageURL: {
+    alternateIDImageURL: {
       type: String,
     },
   },

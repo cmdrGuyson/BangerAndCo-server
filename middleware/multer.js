@@ -1,5 +1,6 @@
 const multer = require("multer");
 
+//Set filename and destination to be stored
 const multerStorage = (type) =>
   multer.diskStorage({
     destination: (req, file, cb) => {
@@ -11,11 +12,17 @@ const multerStorage = (type) =>
     },
   });
 
+//Filter out filetypes other than image
 const multerFilter = (req, file, cb) => {
   if (file.mimetype.startsWith("image")) {
     cb(null, true);
   } else {
-    cb(new Error("Not an image! Please upload an image.", 400), false);
+    cb(
+      {
+        message: "Invalid file type",
+      },
+      false
+    );
   }
 };
 
@@ -23,6 +30,10 @@ const upload = (type) =>
   multer({
     storage: multerStorage(type),
     fileFilter: multerFilter,
+    limits: {
+      fileSize: 10 * 1024 * 1024 * 1024,
+    },
   });
 
 exports.uploadLicenseImageMW = upload("DL").single("image");
+exports.uploadAlternateIDImageMW = upload("AL").single("image");

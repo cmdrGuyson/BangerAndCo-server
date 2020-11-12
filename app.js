@@ -4,23 +4,29 @@ const morgan = require("morgan");
 const http = require("http");
 const mongoose = require("mongoose");
 
+const auth = require("./middleware/auth");
+
+const {
+  signup,
+  login,
+  uploadLicenseImage,
+  uploadAlternateIDImage,
+} = require("./controllers/users");
+
 const app = express();
 
 app.use(cors());
 app.use(express.json());
-
-app.use(express.static(__dirname + "/data"));
-
 /* Log HTTP requests */
 app.use(morgan("dev"));
 
-const { uploadLicenseImageMW } = require("./middleware/imageUpload");
-const { signup, login, uploadLicenseImage } = require("./controllers/users");
+app.use(express.static(__dirname + "/data"));
 
 /* USER ROUTES */
 app.post("/signup", signup);
 app.post("/login", login);
-app.post("/licenseImage", uploadLicenseImageMW, uploadLicenseImage);
+app.post("/licenseImage", auth, uploadLicenseImage);
+app.post("/alternateIDImage", auth, uploadAlternateIDImage);
 
 const port = process.env.PORT || 5000;
 const server = http.createServer(app);
