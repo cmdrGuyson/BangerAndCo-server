@@ -12,6 +12,7 @@ const {
   uploadLicenseImage,
   uploadAlternateIDImage,
   getUsers,
+  changeUserData,
 } = require("./controllers/users");
 
 const app = express();
@@ -29,6 +30,7 @@ app.post("/signup", signup);
 app.post("/login", login);
 app.post("/licenseImage", auth(), uploadLicenseImage);
 app.post("/alternateIDImage", auth(), uploadAlternateIDImage);
+app.post("/user/:id", auth("admin"), changeUserData);
 app.get("/users", auth("admin"), getUsers);
 
 const port = process.env.PORT || 5000;

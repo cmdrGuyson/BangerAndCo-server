@@ -5,6 +5,8 @@ const jwt = require("jsonwebtoken");
 const { JWT_SECRET } = require("../config/env.json");
 const User = require("../models/user");
 
+const { generateUserDataErrors } = require("../utils/validators");
+
 const {
   uploadLicenseImageMW,
   uploadAlternateIDImageMW,
@@ -157,8 +159,40 @@ exports.uploadAlternateIDImage = async (request, response) => {
 /* GET ALL USERS */
 exports.getUsers = async (request, response) => {
   try {
-    let users = await User.find({ role: "user" }).select(["-password"]);
+    const users = await User.find({ role: "user" }).select(["-password"]);
     return response.status(200).json({ users });
+  } catch (error) {
+    return response.status(500).json({ error });
+  }
+};
+
+/* CHANGE USER VERIFICATION DATA */
+exports.changeUserData = async (request, response) => {
+  //use utility function to reduce user data
+  const data = request.body;
+
+  //Get errors
+  const { valid, errors } = generateUserDataErrors(data);
+
+  //If any errors in user input send error response
+  if (!valid) return response.status(400).json(errors);
+
+  try {
+    const id = request.params.id;
+
+    let user = await User.findById(id).orFail();
+
+    //Update user details according to type of data passed
+    if (data.isBlacklisted || data.isBlacklisted === false)
+      user.isBlacklisted = data.isBlacklisted;
+    if (data.isVerified || data.isVerified === false)
+      user.isVerified = data.isVerified;
+    if (data.isPremiumCustomer || data.isPremiumCustomer == false)
+      user.isPremiumCustomer = data.isPremiumCustomer;
+
+    user.save();
+
+    return response.status(200).json({ message: "Data updated successfully" });
   } catch (error) {
     return response.status(500).json({ error });
   }
