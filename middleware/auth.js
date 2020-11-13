@@ -41,7 +41,7 @@ module.exports = (admin) => async (request, response, next) => {
   if (!user) return response.status(403).json({ error: "Unauthoraized" });
 
   //If using as admin authorization middleware. check if user is admin
-  if (admin) {
+  if (admin === "admin") {
     if (user.role !== "admin") {
       return response.status(403).json({ error: "Unauthoraized" });
     }

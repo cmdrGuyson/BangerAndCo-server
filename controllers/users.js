@@ -197,3 +197,28 @@ exports.changeUserData = async (request, response) => {
     return response.status(500).json({ error });
   }
 };
+
+/* GET INFO ON SINGLE USER */
+exports.getUser = async (request, response) => {
+  const id = request.params.id;
+
+  try {
+    let user = await User.findById(id).select(["-password"]);
+    if (!user)
+      return response
+        .status(200)
+        .json({ error: { message: "User not found" } });
+
+    //If user calling the request is not an admin and if the data is not the user's data
+    if (
+      JSON.stringify(user._id) !== JSON.stringify(request.user._id) &&
+      request.user.role !== "admin"
+    )
+      return response.status(403).json({ error: "Unauthoraized" });
+
+    return response.status(200).json(user);
+  } catch (error) {
+    console.log(error);
+    return response.status(500).json({ error });
+  }
+};
