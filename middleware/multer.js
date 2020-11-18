@@ -35,5 +35,5 @@ const upload = (type) =>
     },
   });
 
-exports.uploadLicenseImageMW = upload("DL").single("image");
-exports.uploadAlternateIDImageMW = upload("AL").single("image");
+exports.uploadLicenseImageMW = upload("licenses").single("image");
+exports.uploadAlternateIDImageMW = upload("alternates").single("image");

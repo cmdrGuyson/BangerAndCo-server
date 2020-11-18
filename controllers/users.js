@@ -12,35 +12,43 @@ const {
   uploadAlternateIDImageMW,
 } = require("../middleware/multer");
 
+const { validateRegister } = require("../utils/validators");
+
 /* REGISTER USER */
 exports.signup = async (request, response) => {
   //Create new user object from user request
-  const newUser = {
+  const new_user = {
     firstName: request.body.firstName,
     lastName: request.body.lastName,
     email: request.body.email,
     password: request.body.password,
+    confirmPassword: request.body.confirmPassword,
     NIC: request.body.NIC,
     DLN: request.body.DLN,
     contactNumber: request.body.contactNumber,
     dateOfBirth: request.body.dateOfBirth,
-    isBlacklisted: false,
-    isPremiumCustomer: false,
-    isVerified: false,
     role: "user",
   };
 
   try {
+    let errors = await validateRegister(new_user);
+
+    if (Object.keys(errors).length > 0)
+      return response.status(400).json({ error: errors });
+
     //Hash password
-    newUser.password = newUser.password
-      ? await bcrypt.hash(newUser.password, 6)
+    new_user.password = new_user.password
+      ? await bcrypt.hash(new_user.password, 6)
       : null;
 
     //Create new user object in database
-    const user = await User.create(newUser);
+    const user = await User.create(new_user);
+
+    //Generate JWT
+    let token = jwt.sign({ email }, JWT_SECRET, { expiresIn: 60 * 60 });
 
     //Send user object as response
-    return response.json(user);
+    return response.json({ token });
   } catch (error) {
     return response.status(500).json({ error });
   }
@@ -61,13 +69,14 @@ exports.login = async (request, response) => {
 
     const user = await User.findOne({ email: email });
 
-    if (!user) return response.status(404).json({ error: "User not found" });
+    if (!user)
+      return response.status(404).json({ error: { email: "User not found" } });
 
     //Check password
     const correctPassword = await bcrypt.compare(password, user.password);
 
     if (!correctPassword) {
-      errors.password = "password is incorrect";
+      errors.password = "Password is incorrect";
       response.status(400).json({ error: errors });
     }
 
@@ -97,14 +106,13 @@ exports.uploadLicenseImage = async (request, response) => {
           .status(500)
           .json({ error: { message: "File not found" } });
       }
-      //Set file location as URL in user object
 
       try {
         //Find user from database
         const user = await User.findById(request.user._id).orFail();
 
         //Create image URL from file name and update object
-        user.licenseImageURL = `http://localhost:5000/DL/${request.file.filename}`;
+        user.licenseImageURL = `http://localhost:5000/licenses/${request.file.filename}`;
 
         //Save edited user object
         user.save();
@@ -141,7 +149,7 @@ exports.uploadAlternateIDImage = async (request, response) => {
         const user = await User.findById(request.user._id).orFail();
 
         //Create image URL from file name and update object
-        user.alternateIDImageURL = `http://localhost:5000/AL/${request.file.filename}`;
+        user.alternateIDImageURL = `http://localhost:5000/alternates/${request.file.filename}`;
 
         //Save edited user object
         user.save();
@@ -219,6 +227,20 @@ exports.getUser = async (request, response) => {
     return response.status(200).json(user);
   } catch (error) {
     console.log(error);
+    return response.status(500).json({ error });
+  }
+};
+
+/* GET DATA OF LOGGED IN USER */
+exports.getLoggedUser = async (request, response) => {
+  try {
+    //Find user from database
+    const user = await User.findById(request.user._id)
+      .select(["-password"])
+      .orFail();
+
+    return response.status(200).json(user);
+  } catch (error) {
     return response.status(500).json({ error });
   }
 };

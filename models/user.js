@@ -63,14 +63,17 @@ const userSchema = new Schema(
     isBlacklisted: {
       type: Boolean,
       required: true,
+      default: false,
     },
     isPremiumCustomer: {
       type: Boolean,
       required: true,
+      default: false,
     },
     isVerified: {
       type: Boolean,
       required: true,
+      default: false,
     },
     licenseImageURL: {
       type: String,

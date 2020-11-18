@@ -6,6 +6,7 @@ const mongoose = require("mongoose");
 
 const auth = require("./middleware/auth");
 
+//Import user controllers
 const {
   signup,
   login,
@@ -14,7 +15,11 @@ const {
   getUsers,
   changeUserData,
   getUser,
+  getLoggedUser,
 } = require("./controllers/users");
+
+//Import vehicle controllers
+const { addVehicle, changeRent } = require("./controllers/vehicles");
 
 const app = express();
 
@@ -29,11 +34,16 @@ app.use(express.static(__dirname + "/data"));
 /* USER ROUTES */
 app.post("/signup", signup);
 app.post("/login", login);
-app.post("/licenseImage", auth(), uploadLicenseImage);
-app.post("/alternateIDImage", auth(), uploadAlternateIDImage);
+app.post("/license-image", auth(), uploadLicenseImage);
+app.post("/alternate-id-image", auth(), uploadAlternateIDImage);
 app.post("/user/:id", auth("admin"), changeUserData);
+app.get("/user", auth(), getLoggedUser);
 app.get("/users", auth("admin"), getUsers);
 app.get("/user/:id", auth(), getUser);
+
+/* VEHICLE ROUTES */
+app.post("/vehicle", auth("admin"), addVehicle);
+app.post("/rent/:id", auth("admin"), changeRent);
 
 const port = process.env.PORT || 5000;
 const server = http.createServer(app);
