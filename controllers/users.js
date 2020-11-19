@@ -44,12 +44,15 @@ exports.signup = async (request, response) => {
     //Create new user object in database
     const user = await User.create(new_user);
 
+    const email = user.email;
+
     //Generate JWT
     let token = jwt.sign({ email }, JWT_SECRET, { expiresIn: 60 * 60 });
 
     //Send user object as response
     return response.json({ token });
   } catch (error) {
+    console.log(error);
     return response.status(500).json({ error });
   }
 };
