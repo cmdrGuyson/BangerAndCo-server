@@ -209,6 +209,54 @@ exports.changeUserData = async (request, response) => {
   }
 };
 
+/* CHANGE isVerified PROPERTY */
+exports.changeIsVerified = async (request, response) => {
+  try {
+    const id = request.params.id;
+    let user = await User.findById(id).orFail();
+
+    user.isVerified = !user.isVerified;
+
+    user.save();
+
+    return response.status(200).json({ message: "Data updated successfully" });
+  } catch (error) {
+    return response.status(500).json({ error });
+  }
+};
+
+/* CHANGE isBlacklisted PROPERTY */
+exports.changeIsBlacklisted = async (request, response) => {
+  try {
+    const id = request.params.id;
+    let user = await User.findById(id).orFail();
+
+    user.isBlacklisted = !user.isBlacklisted;
+
+    user.save();
+
+    return response.status(200).json({ message: "Data updated successfully" });
+  } catch (error) {
+    return response.status(500).json({ error });
+  }
+};
+
+/* CHANGE isPremiumCustomer PROPERTY */
+exports.changeIsPremiumCustomer = async (request, response) => {
+  try {
+    const id = request.params.id;
+    let user = await User.findById(id).orFail();
+
+    user.isPremiumCustomer = !user.isPremiumCustomer;
+
+    user.save();
+
+    return response.status(200).json({ message: "Data updated successfully" });
+  } catch (error) {
+    return response.status(500).json({ error });
+  }
+};
+
 /* GET INFO ON SINGLE USER */
 exports.getUser = async (request, response) => {
   const id = request.params.id;

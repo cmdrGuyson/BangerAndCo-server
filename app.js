@@ -16,6 +16,9 @@ const {
   changeUserData,
   getUser,
   getLoggedUser,
+  changeIsVerified,
+  changeIsBlacklisted,
+  changeIsPremiumCustomer,
 } = require("./controllers/users");
 
 //Import vehicle controllers
@@ -40,6 +43,9 @@ app.post("/user/:id", auth("admin"), changeUserData);
 app.get("/user", auth(), getLoggedUser);
 app.get("/users", auth("admin"), getUsers);
 app.get("/user/:id", auth(), getUser);
+app.get("/user/set-verified/:id", auth("admin"), changeIsVerified);
+app.get("/user/set-premium/:id", auth("admin"), changeIsPremiumCustomer);
+app.get("/user/set-blacklisted/:id", auth("admin"), changeIsBlacklisted);
 
 /* VEHICLE ROUTES */
 app.post("/vehicle", auth("admin"), addVehicle);
