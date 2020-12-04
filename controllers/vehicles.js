@@ -34,6 +34,26 @@ exports.changeRent = async (request, response) => {
     vehicle.save();
     return response.status(200).json({ message: "Rent changed successfully" });
   } catch (error) {
-    return response.status(500).error({ error });
+    return response.status(500).json({ error });
+  }
+};
+
+exports.getAllVehicles = async (request, response) => {
+  try {
+    const vehicles = await Vehicle.find();
+    return response.status(200).json({ vehicles });
+  } catch (error) {
+    return response.status(500).json({ error });
+  }
+};
+
+exports.getVehicle = async (request, response) => {
+  const id = request.params.id;
+  try {
+    let vehicle = await Vehicle.findById(id);
+
+    return response.status(200).json(vehicle);
+  } catch (error) {
+    return response.status(500).json({ error });
   }
 };

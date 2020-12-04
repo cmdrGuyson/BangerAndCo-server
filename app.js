@@ -22,7 +22,12 @@ const {
 } = require("./controllers/users");
 
 //Import vehicle controllers
-const { addVehicle, changeRent } = require("./controllers/vehicles");
+const {
+  addVehicle,
+  changeRent,
+  getAllVehicles,
+  getVehicle,
+} = require("./controllers/vehicles");
 
 const app = express();
 
@@ -50,6 +55,8 @@ app.get("/user/set-blacklisted/:id", auth("admin"), changeIsBlacklisted);
 /* VEHICLE ROUTES */
 app.post("/vehicle", auth("admin"), addVehicle);
 app.post("/rent/:id", auth("admin"), changeRent);
+app.get("/vehicles", auth(), getAllVehicles);
+app.get("/vehicle/:id", auth(), getVehicle);
 
 const port = process.env.PORT || 5000;
 const server = http.createServer(app);

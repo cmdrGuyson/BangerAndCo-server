@@ -47,7 +47,7 @@ exports.signup = async (request, response) => {
     const email = user.email;
 
     //Generate JWT
-    let token = jwt.sign({ email }, JWT_SECRET, { expiresIn: 60 * 60 });
+    let token = jwt.sign({ email }, JWT_SECRET, { expiresIn: 2 * 60 * 60 });
 
     //Send user object as response
     return response.json({ token });
@@ -80,11 +80,11 @@ exports.login = async (request, response) => {
 
     if (!correctPassword) {
       errors.password = "Password is incorrect";
-      response.status(400).json({ error: errors });
+      return response.status(400).json({ error: errors });
     }
 
     //Generate JWT
-    let token = jwt.sign({ email }, JWT_SECRET, { expiresIn: 60 * 60 });
+    let token = jwt.sign({ email }, JWT_SECRET, { expiresIn: 2 * 60 * 60 });
 
     return response.json({ token });
   } catch (error) {
@@ -265,7 +265,7 @@ exports.getUser = async (request, response) => {
     let user = await User.findById(id).select(["-password"]);
     if (!user)
       return response
-        .status(200)
+        .status(404)
         .json({ error: { message: "User not found" } });
 
     //If user calling the request is not an admin and if the data is not the user's data
