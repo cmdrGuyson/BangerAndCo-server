@@ -27,6 +27,7 @@ const {
   changeRent,
   getAllVehicles,
   getVehicle,
+  uploadVehicleImage,
 } = require("./controllers/vehicles");
 
 const app = express();
@@ -57,6 +58,7 @@ app.post("/vehicle", auth("admin"), addVehicle);
 app.post("/rent/:id", auth("admin"), changeRent);
 app.get("/vehicles", auth(), getAllVehicles);
 app.get("/vehicle/:id", auth(), getVehicle);
+app.post("/vehicle-image/:id", auth("admin"), uploadVehicleImage);
 
 const port = process.env.PORT || 5000;
 const server = http.createServer(app);
