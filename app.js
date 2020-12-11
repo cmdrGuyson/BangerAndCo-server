@@ -28,6 +28,7 @@ const {
   getAllVehicles,
   getVehicle,
   uploadVehicleImage,
+  deleteVehicle,
 } = require("./controllers/vehicles");
 
 const app = express();
@@ -56,9 +57,10 @@ app.get("/user/set-blacklisted/:id", auth("admin"), changeIsBlacklisted);
 /* VEHICLE ROUTES */
 app.post("/vehicle", auth("admin"), addVehicle);
 app.post("/rent/:id", auth("admin"), changeRent);
-app.get("/vehicles", auth(), getAllVehicles);
+app.get("/vehicles", getAllVehicles);
 app.get("/vehicle/:id", auth(), getVehicle);
 app.post("/vehicle-image/:id", auth("admin"), uploadVehicleImage);
+app.delete("/vehicle/:id", auth("admin"), deleteVehicle);
 
 const port = process.env.PORT || 5000;
 const server = http.createServer(app);

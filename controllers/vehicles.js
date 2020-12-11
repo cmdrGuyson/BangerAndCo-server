@@ -15,10 +15,12 @@ exports.addVehicle = async (request, response) => {
   };
 
   try {
+    //find vehicle through vehicle number
     const _vehicle = await Vehicle.findOne({
       vehicleNumber: new_vehicle.vehicleNumber,
     });
 
+    //if vehicle number exists
     if (_vehicle)
       return response
         .status(400)
@@ -31,10 +33,12 @@ exports.addVehicle = async (request, response) => {
   }
 };
 
+/* CHANGE RENT VALUE OF VEHICLE */
 exports.changeRent = async (request, response) => {
   let rent = request.body.rent;
   let id = request.params.id;
 
+  //if user input is not a number
   if (!rent || typeof rent !== "number")
     return response.status(400).json({ error: { message: "Invalid input" } });
 
@@ -48,6 +52,7 @@ exports.changeRent = async (request, response) => {
   }
 };
 
+/* GET INFORMATION ON ALL VEHICLES */
 exports.getAllVehicles = async (request, response) => {
   try {
     const vehicles = await Vehicle.find();
@@ -57,6 +62,7 @@ exports.getAllVehicles = async (request, response) => {
   }
 };
 
+/* GET INFORMATION ON SINGLE VEHICLE */
 exports.getVehicle = async (request, response) => {
   const id = request.params.id;
   try {
@@ -68,7 +74,19 @@ exports.getVehicle = async (request, response) => {
   }
 };
 
-/* UPLOAD DRIVING LICENSE IMAGE */
+/* DELETE A VEHICLE */
+exports.deleteVehicle = async (request, response) => {
+  const id = request.params.id;
+  try {
+    await Vehicle.findByIdAndDelete(id);
+
+    return response.status(200).json({ message: "Successfully deleted" });
+  } catch (error) {
+    return response.status(500).json({ error });
+  }
+};
+
+/* UPLOAD VEHICLE IMAGE */
 exports.uploadVehicleImage = async (request, response) => {
   uploadVehicleImageMW(request, response, async (error) => {
     if (error) {
