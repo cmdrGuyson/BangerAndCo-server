@@ -170,7 +170,7 @@ exports.uploadAlternateIDImage = async (request, response) => {
 /* GET ALL USERS */
 exports.getUsers = async (request, response) => {
   try {
-    const users = await User.find({ role: "user" }).select(["-password"]);
+    const users = await User.find().select(["-password"]);
     return response.status(200).json({ users });
   } catch (error) {
     return response.status(500).json({ error });

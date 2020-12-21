@@ -31,6 +31,14 @@ const {
   deleteVehicle,
 } = require("./controllers/vehicles");
 
+//Import equipment controllers
+const {
+  addEquipment,
+  getAllEquipment,
+  incrementQuantity,
+  decrementQuantity,
+} = require("./controllers/equipments");
+
 const app = express();
 
 app.use(cors());
@@ -61,6 +69,12 @@ app.get("/vehicles", getAllVehicles);
 app.get("/vehicle/:id", auth(), getVehicle);
 app.post("/vehicle-image/:id", auth("admin"), uploadVehicleImage);
 app.delete("/vehicle/:id", auth("admin"), deleteVehicle);
+
+/* EQUIPMENT ROUTES */
+app.post("/equipment", auth("admin"), addEquipment);
+app.get("/equipment", auth(), getAllEquipment);
+app.get("/equipment/increment/:id", auth("admin"), incrementQuantity);
+app.get("/equipment/decrement/:id", auth("admin"), decrementQuantity);
 
 const port = process.env.PORT || 5000;
 const server = http.createServer(app);

@@ -43,9 +43,6 @@ const vehicleSchema = new Schema(
       required: [true, "Must not be empty"],
       default: true,
     },
-    rentedBy: {
-      type: String,
-    },
     imageURL: {
       type: String,
       required: true,
