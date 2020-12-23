@@ -2,12 +2,14 @@ const { model, Schema } = require("mongoose");
 
 const rentSchema = new Schema(
   {
-    vehicleID: {
-      type: String,
+    vehicle: {
+      type: Schema.Types.ObjectId,
+      ref: "Vehicle",
       required: [true, "Must not be empty"],
     },
-    userID: {
-      type: String,
+    user: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
       required: [true, "Must not be empty"],
     },
     rentedFrom: {

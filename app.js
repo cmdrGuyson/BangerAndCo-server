@@ -29,6 +29,7 @@ const {
   getVehicle,
   uploadVehicleImage,
   deleteVehicle,
+  getAvailableVehicles,
 } = require("./controllers/vehicles");
 
 //Import equipment controllers
@@ -38,6 +39,9 @@ const {
   incrementQuantity,
   decrementQuantity,
 } = require("./controllers/equipments");
+
+//Import rent controllers
+const { rentVehicle } = require("./controllers/rents");
 
 const app = express();
 
@@ -64,17 +68,21 @@ app.get("/user/set-blacklisted/:id", auth("admin"), changeIsBlacklisted);
 
 /* VEHICLE ROUTES */
 app.post("/vehicle", auth("admin"), addVehicle);
-app.post("/rent/:id", auth("admin"), changeRent);
+app.post("/change-rent/:id", auth("admin"), changeRent);
 app.get("/vehicles", getAllVehicles);
 app.get("/vehicle/:id", auth(), getVehicle);
 app.post("/vehicle-image/:id", auth("admin"), uploadVehicleImage);
 app.delete("/vehicle/:id", auth("admin"), deleteVehicle);
+app.post("/available-vehicles", getAvailableVehicles);
 
 /* EQUIPMENT ROUTES */
 app.post("/equipment", auth("admin"), addEquipment);
 app.get("/equipment", auth(), getAllEquipment);
 app.get("/equipment/increment/:id", auth("admin"), incrementQuantity);
 app.get("/equipment/decrement/:id", auth("admin"), decrementQuantity);
+
+/* RENT ROUTES */
+app.post("/rent/:id", auth(), rentVehicle);
 
 const port = process.env.PORT || 5000;
 const server = http.createServer(app);
