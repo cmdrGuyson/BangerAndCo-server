@@ -1,4 +1,7 @@
 const User = require("../models/user");
+const Vehicle = require("../models/vehicle");
+const Rent = require("../models/rent");
+const moment = require("moment");
 
 //Used to create error object if invalid data types are sent to update user data
 exports.generateUserDataErrors = (data) => {
@@ -65,4 +68,38 @@ exports.isOver25 = (birthday_string) => {
   let ageDifMs = Date.now() - birthday.getTime();
   let ageDate = new Date(ageDifMs);
   return Math.abs(ageDate.getUTCFullYear() - 1970) > 25;
+};
+
+exports.getList = async (pickup, dropoff) => {
+  const vehicles = await Vehicle.find();
+
+  const unavailableVehicleIds = [];
+
+  const rents = await Rent.find({
+    $or: [{ status: "pending" }, { status: "collected" }],
+  });
+
+  //If car has previous rents that are pending
+  if (rents.length > 0) {
+    rents.forEach((rent) => {
+      let possibleDropOffDate = new Date(
+        moment(rent.rentedFrom).set({ hour: 0, minute: 0, second: 0 })
+      );
+      let possiblePickUpDate = new Date(
+        moment(rent.rentedTo)
+          .add(2, "day")
+          .set({ hour: 0, minute: 0, second: 0 })
+      );
+      if (dropoff > possibleDropOffDate && pickup < possiblePickUpDate) {
+        unavailableVehicleIds.push(rent.vehicle._id.toString());
+      }
+    });
+  }
+
+  //Create list of available vehicles
+  let availableVehicles = vehicles.filter((vehicle) => {
+    return !unavailableVehicleIds.includes(vehicle._id.toString());
+  });
+
+  return availableVehicles;
 };

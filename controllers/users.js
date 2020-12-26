@@ -12,7 +12,7 @@ const {
   uploadAlternateIDImageMW,
 } = require("../middleware/multer");
 
-const { validateRegister } = require("../utils/validators");
+const { validateRegister, isOver25 } = require("../utils/validators");
 
 /* REGISTER USER */
 exports.signup = async (request, response) => {

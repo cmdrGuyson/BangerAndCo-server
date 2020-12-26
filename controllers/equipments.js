@@ -38,7 +38,6 @@ exports.incrementQuantity = async (request, response) => {
     let equipment = await Equipment.findById(id).orFail();
 
     equipment.totalAmount++;
-    equipment.availableAmount++;
 
     equipment.save();
 
@@ -58,13 +57,12 @@ exports.decrementQuantity = async (request, response) => {
   try {
     let equipment = await Equipment.findById(id).orFail();
 
-    if (equipment.availableAmount === 0)
+    if (equipment.totalAmount === 0)
       return response
         .status(400)
         .json({ error: { message: "Cannot decrement" } });
 
     equipment.totalAmount--;
-    equipment.availableAmount--;
 
     equipment.save();
 

@@ -23,7 +23,7 @@ const rentSchema = new Schema(
     addtionalEquipment: {
       type: Array,
     },
-    rent: {
+    total: {
       type: Number,
       required: [true, "Must not be empty"],
     },

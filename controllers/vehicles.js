@@ -2,7 +2,7 @@ const { request, response } = require("express");
 const moment = require("moment");
 const Vehicle = require("../models/vehicle");
 const { uploadVehicleImageMW } = require("../middleware/multer");
-const { getList } = require("./rents");
+const { getList } = require("../utils/validators");
 
 exports.addVehicle = async (request, response) => {
   //Create new vehicle object from request data
@@ -68,24 +68,18 @@ exports.getAllVehicles = async (request, response) => {
 exports.getAvailableVehicles = async (request, response) => {
   //Get user input
   const userInput = {
-    pickupDate: request.body.pickupDate,
-    pickupTime: request.body.pickupTime,
-    dropoffDate: request.body.dropoffDate,
-    dropoffTime: request.body.dropoffTime,
+    pickupDate: request.params.pickupDate,
+    dropoffDate: request.params.dropoffDate,
   };
 
-  //console.log(userInput);
-
   //Pickup and Dropoff as Date objects
-  const pickup = moment(
-    `${userInput.pickupDate} ${userInput.pickupTime}`,
-    "YYYY-MM-DD HH:mm"
-  ).format();
+  const pickup = moment(userInput.pickupDate, "YYYY-MM-DD")
+    .add(1, "day")
+    .format();
 
-  const dropoff = moment(
-    `${userInput.dropoffDate} ${userInput.dropoffTime}`,
-    "YYYY-MM-DD HH:mm"
-  ).format();
+  const dropoff = moment(userInput.dropoffDate, "YYYY-MM-DD")
+    .add(1, "day")
+    .format();
 
   let vehicles = await getList(new Date(pickup), new Date(dropoff));
 

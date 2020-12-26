@@ -73,7 +73,7 @@ app.get("/vehicles", getAllVehicles);
 app.get("/vehicle/:id", auth(), getVehicle);
 app.post("/vehicle-image/:id", auth("admin"), uploadVehicleImage);
 app.delete("/vehicle/:id", auth("admin"), deleteVehicle);
-app.post("/available-vehicles", getAvailableVehicles);
+app.get("/available-vehicles/:pickupDate/:dropoffDate", getAvailableVehicles);
 
 /* EQUIPMENT ROUTES */
 app.post("/equipment", auth("admin"), addEquipment);
