@@ -38,6 +38,7 @@ const {
   getAllEquipment,
   incrementQuantity,
   decrementQuantity,
+  getAvailableEquipment,
 } = require("./controllers/equipments");
 
 //Import rent controllers
@@ -78,6 +79,11 @@ app.get("/available-vehicles/:pickupDate/:dropoffDate", getAvailableVehicles);
 /* EQUIPMENT ROUTES */
 app.post("/equipment", auth("admin"), addEquipment);
 app.get("/equipment", auth(), getAllEquipment);
+app.get(
+  "/available-equipment/:pickupDate/:dropoffDate",
+  auth(),
+  getAvailableEquipment
+);
 app.get("/equipment/increment/:id", auth("admin"), incrementQuantity);
 app.get("/equipment/decrement/:id", auth("admin"), decrementQuantity);
 

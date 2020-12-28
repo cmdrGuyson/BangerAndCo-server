@@ -88,10 +88,9 @@ exports.getAvailableVehicles = async (request, response) => {
 
 /* GET INFORMATION ON SINGLE VEHICLE */
 exports.getVehicle = async (request, response) => {
-  const id = request.params.id;
   try {
+    const id = request.params.id;
     let vehicle = await Vehicle.findById(id);
-
     return response.status(200).json(vehicle);
   } catch (error) {
     return response.status(500).json({ error });
@@ -100,8 +99,8 @@ exports.getVehicle = async (request, response) => {
 
 /* DELETE A VEHICLE */
 exports.deleteVehicle = async (request, response) => {
-  const id = request.params.id;
   try {
+    const id = request.params.id;
     await Vehicle.findByIdAndDelete(id);
 
     return response.status(200).json({ message: "Successfully deleted" });
