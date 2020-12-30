@@ -42,7 +42,7 @@ const {
 } = require("./controllers/equipments");
 
 //Import rent controllers
-const { rentVehicle } = require("./controllers/rents");
+const { rentVehicle, getMyRents, getRents } = require("./controllers/rents");
 
 const app = express();
 
@@ -89,6 +89,8 @@ app.get("/equipment/decrement/:id", auth("admin"), decrementQuantity);
 
 /* RENT ROUTES */
 app.post("/rent/:id", auth(), rentVehicle);
+app.get("/rents", auth("admin"), getRents);
+app.get("/my-rents", auth(), getMyRents);
 
 const port = process.env.PORT || 5000;
 const server = http.createServer(app);

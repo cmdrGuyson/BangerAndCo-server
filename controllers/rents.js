@@ -153,3 +153,24 @@ exports.rentVehicle = async (request, response) => {
     return response.status(500).json({ error: "Something went wrong" });
   }
 };
+
+//Get all rents in the system
+exports.getRents = async (request, response) => {
+  try {
+    const rents = await Rent.find();
+    return response.status(200).json({ rents });
+  } catch (error) {
+    return response.status(500).json({ error });
+  }
+};
+
+//Get all rents of logged in user
+exports.getMyRents = async (request, response) => {
+  const id = request.user.id;
+  try {
+    const rents = await Rent.find({ user: id });
+    return response.status(200).json({ rents });
+  } catch (error) {
+    return response.status(500).json({ error });
+  }
+};
