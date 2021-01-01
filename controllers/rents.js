@@ -89,12 +89,14 @@ exports.rentVehicle = async (request, response) => {
       else total = (daysRented + 1) * vehicle.rent;
     }
 
+    let equipments = [];
+
     //Total of equipment
     if (
       rentData.additionalEquipment &&
       rentData.additionalEquipment.length > 0
     ) {
-      const equipments = await Equipment.find()
+      equipments = await Equipment.find()
         .where("_id")
         .in(rentData.additionalEquipment)
         .exec();
@@ -128,7 +130,7 @@ exports.rentVehicle = async (request, response) => {
       total,
       status: "pending",
       isInsured,
-      addtionalEquipment: rentData.additionalEquipment,
+      additionalEquipment: equipments,
     };
 
     const rent = await Rent.create(rent_data);
@@ -157,7 +159,10 @@ exports.rentVehicle = async (request, response) => {
 //Get all rents in the system
 exports.getRents = async (request, response) => {
   try {
-    const rents = await Rent.find();
+    const rents = await Rent.find()
+      .populate("user")
+      .populate("vehicle")
+      .populate("additionalEquipment");
     return response.status(200).json({ rents });
   } catch (error) {
     return response.status(500).json({ error });
@@ -168,8 +173,37 @@ exports.getRents = async (request, response) => {
 exports.getMyRents = async (request, response) => {
   const id = request.user.id;
   try {
-    const rents = await Rent.find({ user: id });
-    return response.status(200).json({ rents });
+    const rents = await Rent.find({ user: id })
+      .populate("user")
+      .populate("vehicle")
+      .populate("additionalEquipment");
+    return response.status(200).json({ ...rents });
+  } catch (error) {
+    return response.status(500).json({ error });
+  }
+};
+
+exports.setRentStatus = async (request, response) => {
+  const id = request.params.id;
+  const status = request.body.status;
+
+  try {
+    const rent = await Rent.findById(id);
+
+    //If rent is not found
+    if (!rent) return response.status(404).json({ error: "Rent not found." });
+
+    //If invalid status
+    if (status !== "pending" && status !== "collected" && status !== "returned")
+      response.status(400).json({ error: "Invalid status." });
+
+    //Set new status and save
+    rent.status = status;
+    rent.save();
+
+    return response
+      .status(200)
+      .json({ message: "Successfully changed status" });
   } catch (error) {
     return response.status(500).json({ error });
   }

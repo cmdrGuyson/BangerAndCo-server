@@ -20,9 +20,7 @@ const rentSchema = new Schema(
       type: Date,
       required: [true, "Must not be empty"],
     },
-    addtionalEquipment: {
-      type: Array,
-    },
+    additionalEquipment: [{ type: Schema.Types.ObjectId, ref: "Equipment" }],
     total: {
       type: Number,
       required: [true, "Must not be empty"],

@@ -69,7 +69,7 @@ exports.getAvailableEquipment = async (request, response) => {
             .set({ hour: 0, minute: 0, second: 0 })
         );
         if (dropoff > possibleDropOffDate && pickup < possiblePickUpDate) {
-          activeEquipmentIds.push(...rent.addtionalEquipment);
+          activeEquipmentIds.push(...rent.additionalEquipment);
         }
       });
     }
