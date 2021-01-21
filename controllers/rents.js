@@ -177,7 +177,9 @@ exports.getMyRents = async (request, response) => {
       .populate("user")
       .populate("vehicle")
       .populate("additionalEquipment");
-    return response.status(200).json({ ...rents });
+
+    const _rents = [...rents];
+    return response.status(200).json({ rents: _rents });
   } catch (error) {
     return response.status(500).json({ error });
   }
@@ -204,6 +206,33 @@ exports.setRentStatus = async (request, response) => {
     return response
       .status(200)
       .json({ message: "Successfully changed status" });
+  } catch (error) {
+    return response.status(500).json({ error });
+  }
+};
+
+exports.updateRentEquipment = async (request, response) => {
+  const id = request.params.id;
+
+  try {
+    const rent = await Rent.findById(id);
+
+    //If rent is not found
+    if (!rent) return response.status(404).json({ error: "Rent not found." });
+
+    //If invalid status
+    if (rent.status !== "pending")
+      response.status(400).json({ error: "Rent should be pending." });
+
+    const equipement = request.body.equipement;
+    const newTotal = request.body.newTotal;
+
+    rent.equipement = equipement;
+    rent.total = newTotal;
+
+    rent.save();
+
+    return response.status(200).json({ message: "Successfully updated!" });
   } catch (error) {
     return response.status(500).json({ error });
   }

@@ -127,7 +127,7 @@ exports.uploadVehicleImage = async (request, response) => {
       }
 
       try {
-        //Find user from database
+        //Find vehicle from database
         const vehicle = await Vehicle.findById(request.params.id).orFail();
 
         //Create image URL from file name and update object
