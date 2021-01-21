@@ -224,10 +224,13 @@ exports.updateRentEquipment = async (request, response) => {
     if (rent.status !== "pending")
       response.status(400).json({ error: "Rent should be pending." });
 
-    const equipement = request.body.equipement;
+    const _equipment = request.body.equipment;
     const newTotal = request.body.newTotal;
 
-    rent.equipement = equipement;
+    const equipment = await Equipment.find({ _id: { $in: _equipment } });
+    //console.log(equipment);
+
+    rent.additionalEquipment = equipment;
     rent.total = newTotal;
 
     rent.save();

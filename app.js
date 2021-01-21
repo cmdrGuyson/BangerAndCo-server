@@ -47,6 +47,7 @@ const {
   getMyRents,
   getRents,
   setRentStatus,
+  updateRentEquipment,
 } = require("./controllers/rents");
 
 const app = express();
@@ -97,6 +98,7 @@ app.post("/rent/:id", auth(), rentVehicle);
 app.get("/rents", auth("admin"), getRents);
 app.get("/my-rents", auth(), getMyRents);
 app.post("/rent-status/:id", auth("admin"), setRentStatus);
+app.post("/update-equipment/:id", auth(), updateRentEquipment);
 
 const port = process.env.PORT || 5000;
 const server = http.createServer(app);
