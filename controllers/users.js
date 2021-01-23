@@ -50,7 +50,7 @@ exports.signup = async (request, response) => {
     let token = jwt.sign({ email }, JWT_SECRET, { expiresIn: 2 * 60 * 60 });
 
     //Send user object as response
-    return response.json({ token });
+    return response.status(201).json({ token });
   } catch (error) {
     console.log(error);
     return response.status(500).json({ error });
