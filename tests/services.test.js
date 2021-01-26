@@ -2,44 +2,55 @@ const request = require("supertest");
 const app = require("../server");
 const mongoose = require("mongoose");
 const User = require("../models/user");
+const Vehicle = require("../models/vehicle");
 const bcrypt = require("bcrypt");
 
 const URL = "mongodb://localhost:27017/BangerAndCoTest";
 
-let token;
-let id;
+let token, id, vehicle_id;
+
+beforeAll((done) => {
+  mongoose
+    .connect(URL, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      useCreateIndex: true,
+    })
+    .then(() => {
+      return bcrypt.hash("password", 6);
+    })
+    .then((password) => {
+      User.create({
+        firstName: "Guyson",
+        lastName: "Kuruppu",
+        email: "guyson@email.com",
+        password,
+        NIC: "983647564V",
+        DLN: "B434243275",
+        dateOfBirth: "11/09/1998",
+        contactNumber: "0717463849",
+        role: "admin",
+      });
+    })
+    .then(() => {
+      Vehicle.create({
+        type: "suv",
+        brand: "Toyota",
+        model: "Corolla",
+        fuelType: "petrol",
+        transmission: "auto",
+        vehicleNumber: "CAR-8764",
+        rent: 40,
+      });
+    })
+    .catch((error) => {
+      console.log(error);
+    });
+
+  done();
+});
 
 describe("User Endpoints", () => {
-  beforeAll((done) => {
-    mongoose
-      .connect(URL, {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-        useCreateIndex: true,
-      })
-      .then(() => {
-        return bcrypt.hash("password", 6);
-      })
-      .then((password) => {
-        User.create({
-          firstName: "Guyson",
-          lastName: "Kuruppu",
-          email: "guyson@email.com",
-          password,
-          NIC: "983647564V",
-          DLN: "B434243275",
-          dateOfBirth: "11/09/1998",
-          contactNumber: "0717463849",
-          role: "admin",
-        });
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-
-    done();
-  });
-
   it("Register", async () => {
     const response = await request(app).post("/signup").send({
       firstName: "John",
@@ -140,17 +151,71 @@ describe("User Endpoints", () => {
     expect(response.body).toHaveProperty("message");
     expect(response.body.message).toEqual("Data updated successfully");
   });
+});
 
-  afterAll(async (done) => {
-    // Clearing test database and closing connection
-    try {
-      await mongoose.connection.db.dropDatabase();
-      await mongoose.connection.close();
-      done();
-    } catch (error) {
-      console.log(error);
-      done();
-    }
-    app.close();
+describe("Vehicle Endpoints", () => {
+  it("Add vehicle", async () => {
+    const response = await request(app)
+      .post("/vehicle")
+      .set("Authorization", "Bearer " + token)
+      .send({
+        type: "suv",
+        brand: "KIA",
+        model: "Sorrento",
+        fuelType: "diesel",
+        transmission: "auto",
+        vehicleNumber: "KX-8764",
+        rent: 60.5,
+      });
+    expect(response.statusCode).toEqual(201);
+    expect(response.body).toHaveProperty("_id");
+    vehicle_id = response.body._id;
   });
+
+  it("Add vehicle with existing vehicle number", async () => {
+    const response = await request(app)
+      .post("/vehicle")
+      .set("Authorization", "Bearer " + token)
+      .send({
+        type: "suv",
+        brand: "KIA",
+        model: "Sorrento",
+        fuelType: "diesel",
+        transmission: "auto",
+        vehicleNumber: "KX-8764",
+        rent: 60.5,
+      });
+    expect(response.statusCode).toEqual(400);
+    expect(response.body).toHaveProperty("error");
+  });
+
+  it("Get all available vehicles", async () => {
+    const response = await request(app).get(
+      "/available-vehicles/2021-01-01/2021-01-05"
+    );
+    expect(response.statusCode).toEqual(200);
+    expect(response.body).toHaveProperty("vehicles");
+    expect(response.body.vehicles.length).toBe(2);
+  });
+
+  it("Delete vehicle", async () => {
+    const response = await request(app)
+      .delete(`/vehicle/${vehicle_id}`)
+      .set("Authorization", "Bearer " + token);
+    expect(response.statusCode).toEqual(200);
+    expect(response.body).toHaveProperty("message");
+  });
+});
+
+afterAll(async (done) => {
+  // Clearing test database and closing connection
+  try {
+    await mongoose.connection.db.dropDatabase();
+    await mongoose.connection.close();
+    done();
+  } catch (error) {
+    console.log(error);
+    done();
+  }
+  app.close();
 });

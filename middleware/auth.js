@@ -13,7 +13,7 @@ module.exports = (admin) => async (request, response, next) => {
     //Get bearer token
     token = request.headers.authorization.split("Bearer ")[1];
   } else {
-    console.error("No token found");
+    //console.error("No token found");
     return response.status(403).json({ error: "Unauthoraized" });
   }
 

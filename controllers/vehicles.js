@@ -3,6 +3,7 @@ const moment = require("moment");
 const Vehicle = require("../models/vehicle");
 const { uploadVehicleImageMW } = require("../middleware/multer");
 const { getList } = require("../utils/validators");
+const Rent = require("../models/rent");
 
 exports.addVehicle = async (request, response) => {
   //Create new vehicle object from request data
@@ -29,7 +30,7 @@ exports.addVehicle = async (request, response) => {
         .json({ error: { vehicleNumber: "Vehicle already exists" } });
 
     const vehicle = await Vehicle.create(new_vehicle);
-    return response.status(200).json(vehicle);
+    return response.status(201).json(vehicle);
   } catch (error) {
     return response.status(500).json({ error });
   }
@@ -101,6 +102,16 @@ exports.getVehicle = async (request, response) => {
 exports.deleteVehicle = async (request, response) => {
   try {
     const id = request.params.id;
+
+    //Check if vehicle has any rents
+    let rents = await Rent.find({ vehicle: id });
+
+    if (rents.length > 0)
+      return response.status(400).json({
+        error: { deleteVehicle: "Vehicle cannot be deleted as it has rents" },
+      });
+
+    // Delete the vehicle
     await Vehicle.findByIdAndDelete(id);
 
     return response.status(200).json({ message: "Successfully deleted" });
