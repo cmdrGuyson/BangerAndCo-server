@@ -9,8 +9,6 @@ exports.addEquipment = async (request, response) => {
     name: request.body.name,
     rent: request.body.rent,
     totalAmount: 1,
-    availableAmount: 1,
-    rentedAmount: 0,
   };
 
   try {

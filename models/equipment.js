@@ -10,10 +10,6 @@ const equipmentSchema = new Schema(
       type: Number,
       required: [true, "Must not be empty"],
     },
-    rentedAmount: {
-      type: Number,
-      required: [true, "Must not be empty"],
-    },
     rent: {
       type: Number,
       required: [true, "Must not be empty"],
