@@ -20,8 +20,6 @@ exports.rentVehicle = async (request, response) => {
     additionalEquipment: request.body.additionalEquipment,
   };
 
-  console.log(request.body);
-
   try {
     const vehicle = await Vehicle.findById(vehicleID);
     const user = await User.findById(userID);
@@ -117,7 +115,6 @@ exports.rentVehicle = async (request, response) => {
           else rentAmount = (daysRented + 1) * rent;
         }
         total += rentAmount;
-        console.log(rentAmount, total);
       });
     }
 
@@ -149,7 +146,7 @@ exports.rentVehicle = async (request, response) => {
       });
     }
 
-    return response.status(200).json({ rent });
+    return response.status(201).json({ rent });
   } catch (error) {
     //console.log(error);
     return response.status(500).json({ error: "Something went wrong" });

@@ -14,7 +14,7 @@ exports.addEquipment = async (request, response) => {
   try {
     //Save in database and return response
     const equipment = await Equipment.create(new_equipment);
-    return response.status(200).json(equipment);
+    return response.status(201).json(equipment);
   } catch (error) {
     return response.status(500).json({ error });
   }

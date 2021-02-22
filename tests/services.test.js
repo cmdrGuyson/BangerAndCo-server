@@ -7,9 +7,10 @@ const bcrypt = require("bcrypt");
 
 const URL = "mongodb://localhost:27017/BangerAndCoTest";
 
-let token, id, vehicle_id;
+let token, id, vehicle_id, rentable_vehicle_id, rent_id, equipment_id;
 
 beforeAll((done) => {
+  //Create test database and add users, vehicles
   mongoose
     .connect(URL, {
       useNewUrlParser: true,
@@ -42,6 +43,20 @@ beforeAll((done) => {
         vehicleNumber: "CAR-8764",
         rent: 40,
       });
+    })
+    .then(() => {
+      return Vehicle.create({
+        type: "suv",
+        brand: "Toyota",
+        model: "Corolla",
+        fuelType: "petrol",
+        transmission: "auto",
+        vehicleNumber: "CAR-8233",
+        rent: 40,
+      });
+    })
+    .then((result) => {
+      rentable_vehicle_id = result._id;
     })
     .catch((error) => {
       console.log(error);
@@ -195,7 +210,7 @@ describe("Vehicle Endpoints", () => {
     );
     expect(response.statusCode).toEqual(200);
     expect(response.body).toHaveProperty("vehicles");
-    expect(response.body.vehicles.length).toBe(2);
+    expect(response.body.vehicles.length).toBe(3);
   });
 
   it("Delete vehicle", async () => {
@@ -204,6 +219,104 @@ describe("Vehicle Endpoints", () => {
       .set("Authorization", "Bearer " + token);
     expect(response.statusCode).toEqual(200);
     expect(response.body).toHaveProperty("message");
+  });
+});
+
+describe("Rent Endpoints", () => {
+  it("Rent Vehicle", async () => {
+    const response = await request(app)
+      .post(`/rent/${rentable_vehicle_id}`)
+      .set("Authorization", "Bearer " + token)
+      .send({
+        pickupDate: "2021-02-28",
+        dropoffDate: "2021-03-03",
+        pickupTime: "15:00",
+        dropoffTime: "16:00",
+      });
+    expect(response.statusCode).toEqual(201);
+    expect(response.body.rent.total).toEqual(140);
+    rent_id = response.body.rent._id;
+  });
+
+  it("Attempt to rent rented vehicle", async () => {
+    const response = await request(app)
+      .post(`/rent/${rentable_vehicle_id}`)
+      .set("Authorization", "Bearer " + token)
+      .send({
+        pickupDate: "2021-02-28",
+        dropoffDate: "2021-03-03",
+        pickupTime: "15:00",
+        dropoffTime: "16:00",
+      });
+    expect(response.statusCode).toEqual(400);
+    expect(response.body.error).toEqual("Vehicle unavailable");
+  });
+
+  it("Change rent status", async () => {
+    const response = await request(app)
+      .post(`/rent-status/${rent_id}`)
+      .set("Authorization", "Bearer " + token)
+      .send({
+        status: "returned",
+      });
+
+    expect(response.statusCode).toEqual(200);
+    expect(response.body.message).toEqual("Successfully changed status");
+  });
+
+  it("Get all rents", async () => {
+    const response = await request(app)
+      .get("/rents")
+      .set("Authorization", "Bearer " + token);
+    expect(response.statusCode).toEqual(200);
+    expect(response.body.rents.length).toBe(1);
+  });
+
+  it("Get my rents", async () => {
+    const response = await request(app)
+      .get("/my-rents")
+      .set("Authorization", "Bearer " + token);
+    expect(response.statusCode).toEqual(200);
+    expect(response.body.rents.length).toBe(1);
+  });
+});
+
+describe("Equipment Endpoints", () => {
+  it("Add Equipment", async () => {
+    const response = await request(app)
+      .post("/equipment")
+      .set("Authorization", "Bearer " + token)
+      .send({
+        name: "Wine Chiller",
+        rent: 10,
+      });
+    expect(response.statusCode).toEqual(201);
+    expect(response.body).toHaveProperty("_id");
+    equipment_id = response.body._id;
+  });
+
+  it("Increment equipment count", async () => {
+    const response = await request(app)
+      .get(`/equipment/increment/${equipment_id}`)
+      .set("Authorization", "Bearer " + token);
+    expect(response.statusCode).toEqual(200);
+    expect(response.body.amount).toEqual(2);
+  });
+
+  it("Decrement equipment count", async () => {
+    const response = await request(app)
+      .get(`/equipment/decrement/${equipment_id}`)
+      .set("Authorization", "Bearer " + token);
+    expect(response.statusCode).toEqual(200);
+    expect(response.body.amount).toEqual(1);
+  });
+
+  it("Get all available equipment", async () => {
+    const response = await request(app)
+      .get("/available-equipment/2021-01-01/2021-01-05")
+      .set("Authorization", "Bearer " + token);
+    expect(response.statusCode).toEqual(200);
+    expect(response.body.availableEquipment.length).toBe(1);
   });
 });
 
