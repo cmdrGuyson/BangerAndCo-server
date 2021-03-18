@@ -60,43 +60,43 @@ app.use(morgan("dev"));
 app.use(express.static(__dirname + "/data"));
 
 /* USER ROUTES */
-app.post("/signup", signup);
-app.post("/login", login);
-app.post("/license-image", auth(), uploadLicenseImage);
-app.post("/alternate-id-image", auth(), uploadAlternateIDImage);
-app.post("/user/:id", auth("admin"), changeUserData);
-app.get("/user", auth(), getLoggedUser);
-app.get("/users", auth("admin"), getUsers);
-app.get("/user/:id", auth(), getUser);
-app.get("/user/set-verified/:id", auth("admin"), changeIsVerified);
-app.get("/user/set-premium/:id", auth("admin"), changeIsPremiumCustomer);
-app.get("/user/set-blacklisted/:id", auth("admin"), changeIsBlacklisted);
+app.post("/signup", signup); //Register to system
+app.post("/login", login); //Login to system
+app.post("/license-image", auth(), uploadLicenseImage); //Upload licence images
+app.post("/alternate-id-image", auth(), uploadAlternateIDImage); //Upload alternative id images
+app.post("/user/:id", auth("admin"), changeUserData); //Change a selected user's data
+app.get("/user", auth(), getLoggedUser); //Get information about logged in user
+app.get("/users", auth("admin"), getUsers); //Get all users in the system
+app.get("/user/:id", auth(), getUser); //Get information about a specific user
+app.get("/user/set-verified/:id", auth("admin"), changeIsVerified); //Change isVerified property of selected user
+app.get("/user/set-premium/:id", auth("admin"), changeIsPremiumCustomer); //Change isPremium property of selected user
+app.get("/user/set-blacklisted/:id", auth("admin"), changeIsBlacklisted); //Change isBlacklisted property of selected user
 
 /* VEHICLE ROUTES */
-app.post("/vehicle", auth("admin"), addVehicle);
-app.post("/change-rent/:id", auth("admin"), changeRent);
-app.get("/vehicles", getAllVehicles);
-app.get("/vehicle/:id", auth(), getVehicle);
-app.post("/vehicle-image/:id", auth("admin"), uploadVehicleImage);
-app.delete("/vehicle/:id", auth("admin"), deleteVehicle);
-app.get("/available-vehicles/:pickupDate/:dropoffDate", getAvailableVehicles);
+app.post("/vehicle", auth("admin"), addVehicle); //Add a vehicle to the system
+app.post("/change-rent/:id", auth("admin"), changeRent); //Change rent amount of a selected vehicle
+app.get("/vehicles", getAllVehicles); //Get all vehicles in the system
+app.get("/vehicle/:id", auth(), getVehicle); //Get a single vehicle's information
+app.post("/vehicle-image/:id", auth("admin"), uploadVehicleImage); //Upload vehicle's image
+app.delete("/vehicle/:id", auth("admin"), deleteVehicle); //Delete vehicle
+app.get("/available-vehicles/:pickupDate/:dropoffDate", getAvailableVehicles); //Get all available vehicles in a selected time period
 
 /* EQUIPMENT ROUTES */
-app.post("/equipment", auth("admin"), addEquipment);
-app.get("/equipment", auth(), getAllEquipment);
+app.post("/equipment", auth("admin"), addEquipment); //Add equipment to the system
+app.get("/equipment", auth(), getAllEquipment); //Get all equipment in thesystem
 app.get(
   "/available-equipment/:pickupDate/:dropoffDate",
   auth(),
   getAvailableEquipment
-);
-app.get("/equipment/increment/:id", auth("admin"), incrementQuantity);
-app.get("/equipment/decrement/:id", auth("admin"), decrementQuantity);
+); //Get available equipment within a selected time period
+app.get("/equipment/increment/:id", auth("admin"), incrementQuantity); //Increment equipment count of selected equipment
+app.get("/equipment/decrement/:id", auth("admin"), decrementQuantity); //Decrement equipement count of selected equipement
 
 /* RENT ROUTES */
-app.post("/rent/:id", auth(), rentVehicle);
-app.get("/rents", auth("admin"), getRents);
-app.get("/my-rents", auth(), getMyRents);
-app.post("/rent-status/:id", auth("admin"), setRentStatus);
-app.post("/update-equipment/:id", auth(), updateRentEquipment);
+app.post("/rent/:id", auth(), rentVehicle); //Rent a specified vehicle
+app.get("/rents", auth("admin"), getRents); //Get all rents within system
+app.get("/my-rents", auth(), getMyRents); //Get all rents of logged in user
+app.post("/rent-status/:id", auth("admin"), setRentStatus); //Change rent status of given rent
+app.post("/update-equipment/:id", auth(), updateRentEquipment); //Update equipment within a rent
 
 module.exports = http.createServer(app);

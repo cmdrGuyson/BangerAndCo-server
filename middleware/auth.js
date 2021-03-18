@@ -51,3 +51,11 @@ module.exports = (admin) => async (request, response, next) => {
 
   return next();
 };
+
+/* Use of middleware 
+
+    None - Route accessible for all users including unregistered
+    auth() - Route accessible for all registered and logged in users
+    auth("admin") - Route accessible to all logged in administrators
+
+*/
