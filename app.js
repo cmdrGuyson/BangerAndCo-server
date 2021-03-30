@@ -2,7 +2,7 @@ const server = require("./server");
 const mongoose = require("mongoose");
 
 const port = process.env.PORT || 5000;
-const URL = "mongodb://localhost:27017/BangerAndCo";
+const URL = process.env.DATABASE_URL;
 
 server.listen(port, () => {
   console.log("Server online at http://localhost:5000");

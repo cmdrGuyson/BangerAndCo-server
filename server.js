@@ -1,7 +1,11 @@
+//Configure environment variables
+require("dotenv").config();
+
 const express = require("express");
 const cors = require("cors");
 const morgan = require("morgan");
 const http = require("http");
+const schedule = require("node-schedule");
 
 const auth = require("./middleware/auth");
 
@@ -48,6 +52,9 @@ const {
   setRentStatus,
   updateRentEquipment,
 } = require("./controllers/rents");
+
+//Import scheduled jobs
+const { syncDmvLicenses } = require("./jobs/dmv");
 
 const app = express();
 
@@ -98,5 +105,16 @@ app.get("/rents", auth("admin"), getRents); //Get all rents within system
 app.get("/my-rents", auth(), getMyRents); //Get all rents of logged in user
 app.post("/rent-status/:id", auth("admin"), setRentStatus); //Change rent status of given rent
 app.post("/update-equipment/:id", auth(), updateRentEquipment); //Update equipment within a rent
+
+/* SCHEDULE JOBS */
+const rule = new schedule.RecurrenceRule();
+rule.hour = 21;
+rule.minute = 28;
+rule.second = 00;
+rule.tz = process.env.TIME_ZONE;
+
+const job = schedule.scheduleJob(rule, function () {
+  syncDmvLicenses();
+});
 
 module.exports = http.createServer(app);
