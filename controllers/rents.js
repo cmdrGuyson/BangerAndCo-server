@@ -1,11 +1,15 @@
+const { request, response } = require("express");
+const moment = require("moment");
+const nodemailer = require("nodemailer");
+
 const User = require("../models/user");
 const Vehicle = require("../models/vehicle");
 const Rent = require("../models/rent");
-const { request, response } = require("express");
-const moment = require("moment");
+const Offence = require("../models/offence");
+const Equipment = require("../models/equipment");
 
 const { isOver25, getList } = require("../utils/validators");
-const Equipment = require("../models/equipment");
+const { generateHtml } = require("../utils/mail");
 
 exports.rentVehicle = async (request, response) => {
   const vehicleID = request.params.id;
@@ -22,11 +26,17 @@ exports.rentVehicle = async (request, response) => {
 
   try {
     const vehicle = await Vehicle.findById(vehicleID);
-    const user = await User.findById(userID);
+    const user = await User.findById(userID).orFail();
 
     //Check if vehicle exists
     if (!vehicle)
       return response.status(404).json({ error: "Vehicle not found" });
+
+    //Check if user is blacklisted by DMV
+    let isBlacklisted_dmv = handleOffences(user);
+
+    if (isBlacklisted_dmv)
+      return response.status(403).json({ error: "Blacklisted by dmv" });
 
     //Check if user is not blacklisted and is verified
     if (user.isBlacklisted)
@@ -237,3 +247,100 @@ exports.updateRentEquipment = async (request, response) => {
     return response.status(500).json({ error });
   }
 };
+
+// Send email if license is blacklisted
+const handleOffences = async (user) => {
+  try {
+    //const user = await User.findById(id);
+
+    //Check if any offences are there for license number
+    const offence = await Offence.findOne({ DLN: user.DLN });
+
+    //If there are no offences return false
+    if (!offence) return false;
+
+    //If there are offences
+
+    //Set user as blaclisted
+    user.isBlacklisted = true;
+    await user.save();
+
+    //Connect to mail account
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.FROM_EMAIL,
+        pass: process.env.EMAIL_PASSWORD,
+      },
+    });
+
+    //Generate and send email
+    const data = {
+      userImageUrl: user.userImageURL,
+      userImageFilename: user.userImageURL.slice(28),
+      licenseImageUrl: user.licenseImageURL,
+      licenseFilename: user.licenseImageURL.slice(31),
+      name: `${user.firstName} ${user.lastName}`,
+      DLN: offence.DLN,
+      offence: offence.offence,
+      reportedTime: moment(offence.dateTimeReported)
+        .format("h:mm A", {
+          timeZone: "Asia/Colombo",
+        })
+        .toString(),
+      reportedDate: moment(offence.dateTimeReported)
+        .format("DD/MM/YYYY", {
+          timeZone: "Asia/Colombo",
+        })
+        .toString(),
+      incidentDate: moment()
+        .format("DD/MM/YYYY", {
+          timeZone: "Asia/Colombo",
+        })
+        .toString(),
+      incidentTime: moment()
+        .format("h:mm A", {
+          timeZone: "Asia/Colombo",
+        })
+        .toString(),
+    };
+
+    const html = generateHtml(data);
+
+    const mailOptions = {
+      from: process.env.FROM_EMAIL,
+      to: process.env.TO_EMAIL,
+      subject: "Attempted use of blacklisted license",
+      text:
+        "A blacklisted license was used to rent a vehicle from our website. Please find the information relating to the incident below",
+      html,
+      attachments: [
+        {
+          filename: data.userImageFilename,
+          path: data.userImageUrl,
+          cid: "user",
+        },
+        {
+          filename: data.licenseFilename,
+          path: data.licenseImageUrl,
+          cid: "license",
+        },
+      ],
+    };
+
+    transporter.sendMail(mailOptions, function (error, info) {
+      if (error) {
+        console.log(error);
+      } else {
+        console.log("Email sent: " + info.response);
+      }
+    });
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+
+  return true;
+};
+
+//handleOffences("5fad849abd8c5a2cf44f1a83");
