@@ -38,3 +38,4 @@ const upload = (type) =>
 exports.uploadLicenseImageMW = upload("licenses").single("image");
 exports.uploadAlternateIDImageMW = upload("alternates").single("image");
 exports.uploadVehicleImageMW = upload("vehicles").single("image");
+exports.uploadUserImageMW = upload("users").single("image");

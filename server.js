@@ -22,6 +22,7 @@ const {
   changeIsVerified,
   changeIsBlacklisted,
   changeIsPremiumCustomer,
+  uploadUserImage,
 } = require("./controllers/users");
 
 //Import vehicle controllers
@@ -71,6 +72,7 @@ app.post("/signup", signup); //Register to system
 app.post("/login", login); //Login to system
 app.post("/license-image", auth(), uploadLicenseImage); //Upload licence images
 app.post("/alternate-id-image", auth(), uploadAlternateIDImage); //Upload alternative id images
+app.post("/user-image", auth(), uploadUserImage); //Upload user image
 app.post("/user/:id", auth("admin"), changeUserData); //Change a selected user's data
 app.get("/user", auth(), getLoggedUser); //Get information about logged in user
 app.get("/users", auth("admin"), getUsers); //Get all users in the system

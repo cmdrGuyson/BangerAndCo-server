@@ -10,6 +10,7 @@ const { generateUserDataErrors } = require("../utils/validators");
 const {
   uploadLicenseImageMW,
   uploadAlternateIDImageMW,
+  uploadUserImageMW,
 } = require("../middleware/multer");
 
 const { validateRegister, isOver25 } = require("../utils/validators");
@@ -130,7 +131,7 @@ exports.uploadLicenseImage = async (request, response) => {
   });
 };
 
-/* UPLOAD DRIVING LICENSE IMAGE */
+/* UPLOAD ALTERNARE ID IMAGE */
 exports.uploadAlternateIDImage = async (request, response) => {
   uploadAlternateIDImageMW(request, response, async (error) => {
     if (error) {
@@ -153,6 +154,43 @@ exports.uploadAlternateIDImage = async (request, response) => {
 
         //Create image URL from file name and update object
         user.alternateIDImageURL = `http://localhost:5000/alternates/${request.file.filename}`;
+
+        //Save edited user object
+        user.save();
+
+        return response
+          .status(200)
+          .json({ message: "Image uploaded successfully" });
+      } catch (error) {
+        return response.status(500).json({ error });
+      }
+    }
+  });
+};
+
+/* UPLOAD USER IMAGE */
+exports.uploadUserImage = async (request, response) => {
+  uploadUserImageMW(request, response, async (error) => {
+    if (error) {
+      //instanceof multer.MulterError
+
+      if (error.code == "LIMIT_FILE_SIZE") {
+        error.message = "File Size is too large.";
+      }
+      return response.status(500).json({ error });
+    } else {
+      if (!request.file) {
+        return response
+          .status(500)
+          .json({ error: { message: "File not found" } });
+      }
+
+      try {
+        //Find user from database
+        const user = await User.findById(request.user._id).orFail();
+
+        //Create image URL from file name and update object
+        user.userImageURL = `http://localhost:5000/users/${request.file.filename}`;
 
         //Save edited user object
         user.save();

@@ -81,6 +81,9 @@ const userSchema = new Schema(
     alternateIDImageURL: {
       type: String,
     },
+    userImageURL: {
+      type: String,
+    },
   },
   { timestamps: true }
 );
