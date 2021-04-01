@@ -1,9 +1,14 @@
 const { request, response } = require("express");
 const moment = require("moment");
+const axios = require("axios");
+const cheerio = require("cheerio");
+
 const Vehicle = require("../models/vehicle");
+const Rent = require("../models/rent");
+
 const { uploadVehicleImageMW } = require("../middleware/multer");
 const { getList } = require("../utils/validators");
-const Rent = require("../models/rent");
+const { toPascalCase } = require("../utils/utils");
 
 exports.addVehicle = async (request, response) => {
   //Create new vehicle object from request data
@@ -155,4 +160,48 @@ exports.uploadVehicleImage = async (request, response) => {
       }
     }
   });
+};
+
+/* SCRAPE PRICES FROM WEBSITE */
+exports.getPrices = async (request, response) => {
+  const url = process.env.SCRAPE_URL;
+
+  try {
+    let result = await axios.get(url);
+
+    const html = result.data;
+    const $ = cheerio.load(html);
+
+    const priceTable = $(".row-hover > tr");
+
+    const prices = [];
+
+    priceTable.each(function () {
+      const type = $(this).find(".column-1 > h2").text();
+
+      if (type !== "") prices.push({ type, prices: [] });
+
+      const name = toPascalCase($(this).find(".column-1 > span").text());
+
+      if (name !== "") {
+        const rentPerMonth = parseFloat(
+          $(this).find(".column-2 > span").text().split("$")[1]
+        );
+        const rentPerWeek = parseFloat(
+          $(this).find(".column-3 > span").text().split("$")[1]
+        );
+        const rentPerDay = parseFloat((rentPerWeek / 7).toFixed(2));
+        prices[prices.length - 1].prices.push({
+          name,
+          rentPerMonth,
+          rentPerWeek,
+          rentPerDay,
+        });
+      }
+    });
+
+    return response.status(200).json({ prices });
+  } catch (error) {
+    console.log(error);
+  }
 };

@@ -34,6 +34,7 @@ const {
   uploadVehicleImage,
   deleteVehicle,
   getAvailableVehicles,
+  getPrices,
 } = require("./controllers/vehicles");
 
 //Import equipment controllers
@@ -89,6 +90,7 @@ app.get("/vehicle/:id", auth(), getVehicle); //Get a single vehicle's informatio
 app.post("/vehicle-image/:id", auth("admin"), uploadVehicleImage); //Upload vehicle's image
 app.delete("/vehicle/:id", auth("admin"), deleteVehicle); //Delete vehicle
 app.get("/available-vehicles/:pickupDate/:dropoffDate", getAvailableVehicles); //Get all available vehicles in a selected time period
+app.get("/prices", getPrices); //Scrape and get referencial pricing
 
 /* EQUIPMENT ROUTES */
 app.post("/equipment", auth("admin"), addEquipment); //Add equipment to the system
