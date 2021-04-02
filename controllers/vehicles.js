@@ -167,19 +167,31 @@ exports.getPrices = async (request, response) => {
   const url = process.env.SCRAPE_URL;
 
   try {
+    //Get html data from site and load to cheerio
     let result = await axios.get(url);
 
     const html = result.data;
     const $ = cheerio.load(html);
 
+    //Get all table rows of considered table
     const priceTable = $(".row-hover > tr");
 
     const prices = [];
 
+    let lowestPrice = Infinity;
+    let lowestPriceIndex = 0;
+
+    //Get prices for all vehicles in table
     priceTable.each(function () {
       const type = $(this).find(".column-1 > h2").text();
 
-      if (type !== "") prices.push({ type, prices: [] });
+      if (type !== "") {
+        prices.push({ type, prices: [] });
+
+        //Reset lowest price
+        lowestPrice = Infinity;
+        lowestPriceIndex = 0;
+      }
 
       const name = toPascalCase($(this).find(".column-1 > span").text());
 
@@ -191,11 +203,26 @@ exports.getPrices = async (request, response) => {
           $(this).find(".column-3 > span").text().split("$")[1]
         );
         const rentPerDay = parseFloat((rentPerWeek / 7).toFixed(2));
+
+        //Find lowest price
+        let isLowestPrice = rentPerMonth < lowestPrice;
+
+        //Remove lowest price from previous lowest price entry
+        if (isLowestPrice) {
+          lowestPrice = rentPerMonth;
+          if (prices[prices.length - 1].prices[lowestPriceIndex])
+            prices[prices.length - 1].prices[
+              lowestPriceIndex
+            ].isLowestPrice = false;
+        }
+
+        //Add price to list
         prices[prices.length - 1].prices.push({
           name,
           rentPerMonth,
           rentPerWeek,
           rentPerDay,
+          isLowestPrice,
         });
       }
     });
