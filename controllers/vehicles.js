@@ -183,7 +183,7 @@ exports.getPrices = async (request, response) => {
 
     //Get prices for all vehicles in table
     priceTable.each(function () {
-      const type = $(this).find(".column-1 > h2").text();
+      const type = toPascalCase($(this).find(".column-1 > h2").text());
 
       if (type !== "") {
         prices.push({ type, prices: [] });
