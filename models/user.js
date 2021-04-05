@@ -60,6 +60,10 @@ const userSchema = new Schema(
         message: "Not a valid contact number",
       },
     },
+    address: {
+      type: String,
+      required: [true, "Must not be empty"],
+    },
     isBlacklisted: {
       type: Boolean,
       required: true,

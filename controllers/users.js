@@ -28,6 +28,7 @@ exports.signup = async (request, response) => {
     DLN: request.body.DLN,
     contactNumber: request.body.contactNumber,
     dateOfBirth: request.body.dateOfBirth,
+    address: request.body.address,
     role: "user",
   };
 
