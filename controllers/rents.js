@@ -8,7 +8,7 @@ const Rent = require("../models/rent");
 const Offence = require("../models/offence");
 const Equipment = require("../models/equipment");
 
-const { isOver25, getList } = require("../utils/validators");
+const { isOver25, getList, isTimesValid } = require("../utils/validators");
 const { generateHtml } = require("../utils/mail");
 
 exports.rentVehicle = async (request, response) => {
@@ -33,7 +33,9 @@ exports.rentVehicle = async (request, response) => {
       return response.status(404).json({ error: "Vehicle not found" });
 
     //Check if user is blacklisted by DMV
-    let isBlacklisted_dmv = handleOffences(user);
+    let isBlacklisted_dmv = await handleOffences(user);
+
+    console.log(isBlacklisted_dmv);
 
     if (isBlacklisted_dmv)
       return response.status(403).json({ error: "Blacklisted by dmv" });
@@ -57,6 +59,12 @@ exports.rentVehicle = async (request, response) => {
       `${rentData.dropoffDate} ${rentData.dropoffTime}`,
       "YYYY-MM-DD HH:mm"
     );
+
+    //Check validity of pickup and dropoff times
+    if (!isTimesValid(rentData))
+      return response
+        .status(400)
+        .json({ error: "Invalid pickup and dropoff times" });
 
     const pickup = _pickup.format();
     const dropoff = _dropoff.format();

@@ -54,7 +54,39 @@ exports.validateRegister = async (data) => {
   }
 };
 
-//Utility function to determine is age is greater than 18
+//Validate pickup and dropoff times
+exports.isTimesValid = (rent_data) => {
+  const pickup_time = moment(rent_data.pickupTime, "HH:mm");
+  const dropoff_time = moment(rent_data.dropoffTime, "HH:mm");
+
+  const opening_time = moment("07:59", "HH:mm");
+  const closing_time = moment("16:01", "HH:mm");
+
+  //Pickup and dropoff times are between working hours
+  if (!pickup_time.isBetween(opening_time, closing_time)) return false;
+  if (!dropoff_time.isBetween(opening_time, closing_time)) return false;
+
+  //Validate rent duration
+  const pickup = moment(
+    `${rent_data.pickupDate} ${rent_data.pickupTime}`,
+    "YYY-MM-DD HH:mm"
+  );
+  const dropoff = moment(
+    `${rent_data.dropoffDate} ${rent_data.dropoffTime}`,
+    "YYY-MM-DD HH:mm"
+  );
+
+  const diff = dropoff.diff(pickup, "minutes");
+
+  console.log(diff);
+
+  if (diff < 300) return false;
+  if (diff > 20160) return false;
+
+  return true;
+};
+
+//Utility function to determine if age is greater than 18
 const isOver18 = (birthday_string) => {
   let birthday = new Date(birthday_string);
   let ageDifMs = Date.now() - birthday.getTime();

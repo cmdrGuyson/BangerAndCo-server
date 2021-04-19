@@ -27,10 +27,11 @@ beforeAll((done) => {
         email: "guyson@email.com",
         password,
         NIC: "983647564V",
-        DLN: "B434243275",
+        DLN: "B434343275",
         dateOfBirth: "11/09/1998",
         contactNumber: "0717463849",
         role: "admin",
+        address: "16B/3, Abstern Avn",
       });
     })
     .then(() => {
@@ -73,10 +74,11 @@ describe("User Endpoints", () => {
       email: "john@email.com",
       password: "password",
       NIC: "987469377V",
-      DLN: "B43243275",
+      DLN: "B43283275",
       confirmPassword: "password",
       dateOfBirth: "11/09/1998",
       contactNumber: "0718475638",
+      address: "647/d, Root road",
     });
     expect(response.statusCode).toEqual(201);
     expect(response.body).toHaveProperty("token");
@@ -89,10 +91,11 @@ describe("User Endpoints", () => {
       email: "john@email.com",
       password: "password",
       NIC: "987469377V",
-      DLN: "B43243275",
+      DLN: "B43293275",
       confirmPassword: "password",
       dateOfBirth: "11/09/1998",
       contactNumber: "0718475638",
+      address: "643/d, Root road",
     });
     expect(response.statusCode).toEqual(400);
     expect(response.body).toHaveProperty("error");
@@ -151,7 +154,7 @@ describe("User Endpoints", () => {
 
   it("Get all users", async () => {
     const response = await request(app)
-      .get(`/users`)
+      .get("/users/")
       .set("Authorization", "Bearer " + token);
     expect(response.statusCode).toEqual(200);
     expect(response.body).toHaveProperty("users");
@@ -250,6 +253,62 @@ describe("Rent Endpoints", () => {
       });
     expect(response.statusCode).toEqual(400);
     expect(response.body.error).toEqual("Vehicle unavailable");
+  });
+
+  it("Attempt to rent vehicle with invalid pickup time", async () => {
+    const response = await request(app)
+      .post(`/rent/${rentable_vehicle_id}`)
+      .set("Authorization", "Bearer " + token)
+      .send({
+        pickupDate: "2021-03-04",
+        dropoffDate: "2021-03-05",
+        pickupTime: "07:00",
+        dropoffTime: "15:00",
+      });
+    expect(response.statusCode).toEqual(400);
+    expect(response.body.error).toEqual("Invalid pickup and dropoff times");
+  });
+
+  it("Attempt to rent vehicle with invalid dropoff time", async () => {
+    const response = await request(app)
+      .post(`/rent/${rentable_vehicle_id}`)
+      .set("Authorization", "Bearer " + token)
+      .send({
+        pickupDate: "2021-03-04",
+        dropoffDate: "2021-03-05",
+        pickupTime: "09:00",
+        dropoffTime: "20:00",
+      });
+    expect(response.statusCode).toEqual(400);
+    expect(response.body.error).toEqual("Invalid pickup and dropoff times");
+  });
+
+  it("Attempt to rent vehicle with invalid rent duration", async () => {
+    const response = await request(app)
+      .post(`/rent/${rentable_vehicle_id}`)
+      .set("Authorization", "Bearer " + token)
+      .send({
+        pickupDate: "2021-03-04",
+        dropoffDate: "2021-04-05",
+        pickupTime: "09:00",
+        dropoffTime: "15:00",
+      });
+    expect(response.statusCode).toEqual(400);
+    expect(response.body.error).toEqual("Invalid pickup and dropoff times");
+  });
+
+  it("Attempt to rent vehicle with invalid rent duration (Lower)", async () => {
+    const response = await request(app)
+      .post(`/rent/${rentable_vehicle_id}`)
+      .set("Authorization", "Bearer " + token)
+      .send({
+        pickupDate: "2021-03-04",
+        dropoffDate: "2021-04-04",
+        pickupTime: "09:00",
+        dropoffTime: "09:30",
+      });
+    expect(response.statusCode).toEqual(400);
+    expect(response.body.error).toEqual("Invalid pickup and dropoff times");
   });
 
   it("Change rent status", async () => {

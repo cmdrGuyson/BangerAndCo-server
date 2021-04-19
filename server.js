@@ -9,6 +9,8 @@ const schedule = require("node-schedule");
 
 const auth = require("./middleware/auth");
 
+const ENV = "TESTING";
+
 //Import user controllers
 const {
   signup,
@@ -111,14 +113,16 @@ app.post("/rent-status/:id", auth("admin"), setRentStatus); //Change rent status
 app.post("/update-equipment/:id", auth(), updateRentEquipment); //Update equipment within a rent
 
 /* SCHEDULE JOBS */
-const rule = new schedule.RecurrenceRule();
-rule.hour = 21;
-rule.minute = 28;
-rule.second = 00;
-rule.tz = process.env.TIME_ZONE;
+if (ENV !== "TESTING") {
+  const rule = new schedule.RecurrenceRule();
+  rule.hour = 21;
+  rule.minute = 28;
+  rule.second = 0;
+  rule.tz = process.env.TIME_ZONE;
 
-const job = schedule.scheduleJob(rule, function () {
-  syncDmvLicenses();
-});
+  const job = schedule.scheduleJob(rule, function () {
+    syncDmvLicenses();
+  });
+}
 
 module.exports = http.createServer(app);
