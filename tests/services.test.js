@@ -283,7 +283,7 @@ describe("Rent Endpoints", () => {
     expect(response.body.error).toEqual("Invalid pickup and dropoff times");
   });
 
-  it("Attempt to rent vehicle with invalid rent duration", async () => {
+  it("Attempt to rent vehicle with invalid rent duration (Higher)", async () => {
     const response = await request(app)
       .post(`/rent/${rentable_vehicle_id}`)
       .set("Authorization", "Bearer " + token)

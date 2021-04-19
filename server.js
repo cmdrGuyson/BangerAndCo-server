@@ -9,7 +9,7 @@ const schedule = require("node-schedule");
 
 const auth = require("./middleware/auth");
 
-const ENV = "TESTING";
+const ENV = "DEV";
 
 //Import user controllers
 const {
@@ -58,7 +58,7 @@ const {
 } = require("./controllers/rents");
 
 //Import scheduled jobs
-const { syncDmvLicenses } = require("./jobs/dmv");
+const { syncDmvLicenses, syncUnclaimedRents } = require("./jobs/automated_job");
 
 const app = express();
 
@@ -115,13 +115,23 @@ app.post("/update-equipment/:id", auth(), updateRentEquipment); //Update equipme
 /* SCHEDULE JOBS */
 if (ENV !== "TESTING") {
   const rule = new schedule.RecurrenceRule();
-  rule.hour = 21;
-  rule.minute = 28;
-  rule.second = 0;
+  rule.hour = 0;
+  rule.minute = 1;
   rule.tz = process.env.TIME_ZONE;
 
   const job = schedule.scheduleJob(rule, function () {
     syncDmvLicenses();
+  });
+}
+
+if (ENV !== "TESTING") {
+  const rule = new schedule.RecurrenceRule();
+  rule.hour = 18;
+  rule.minute = 00;
+  rule.tz = process.env.TIME_ZONE;
+
+  const job = schedule.scheduleJob(rule, function () {
+    syncUnclaimedRents();
   });
 }
 

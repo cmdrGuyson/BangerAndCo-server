@@ -35,7 +35,7 @@ exports.rentVehicle = async (request, response) => {
     //Check if user is blacklisted by DMV
     let isBlacklisted_dmv = await handleOffences(user);
 
-    console.log(isBlacklisted_dmv);
+    //console.log(isBlacklisted_dmv);
 
     if (isBlacklisted_dmv)
       return response.status(403).json({ error: "Blacklisted by dmv" });
