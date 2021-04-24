@@ -2,11 +2,11 @@ const { request, response } = require("express");
 const moment = require("moment");
 const nodemailer = require("nodemailer");
 
-const User = require("../models/user");
-const Vehicle = require("../models/vehicle");
-const Rent = require("../models/rent");
-const Offence = require("../models/offence");
-const Equipment = require("../models/equipment");
+const User = require("../mdb_models/user");
+const Vehicle = require("../mdb_models/vehicle");
+const Rent = require("../mdb_models/rent");
+const Offence = require("../mdb_models/offence");
+const Equipment = require("../mdb_models/equipment");
 
 const { isOver25, getList, isTimesValid } = require("../utils/validators");
 const { generateHtml } = require("../utils/mail");

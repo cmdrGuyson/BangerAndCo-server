@@ -3,8 +3,8 @@ const moment = require("moment");
 const axios = require("axios");
 const cheerio = require("cheerio");
 
-const Vehicle = require("../models/vehicle");
-const Rent = require("../models/rent");
+const Vehicle = require("../mdb_models/vehicle");
+const Rent = require("../mdb_models/rent");
 
 const { uploadVehicleImageMW } = require("../middleware/multer");
 const { getList } = require("../utils/validators");

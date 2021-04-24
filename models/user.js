@@ -1,97 +1,43 @@
-const { model, Schema } = require("mongoose");
-
-/*Regular expressions for data*/
-const emailRegEx = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-const NICRegEx = /^\d{9}(v|V)$/;
-const contactRegEx = /^\d{10}$/;
-
-const userSchema = new Schema(
-  {
-    email: {
-      type: String,
-      unique: true,
-      required: [true, "Must not be empty"],
-      validate: {
-        validator: (email) => emailRegEx.test(email),
-        message: "Not a valid email address",
+"use strict";
+const { Model } = require("sequelize");
+module.exports = (sequelize, DataTypes) => {
+  class User extends Model {
+    /**
+     * Helper method for defining associations.
+     * This method is not a part of Sequelize lifecycle.
+     * The `models/index` file will call this method automatically.
+     */
+    static associate(models) {
+      // define association here
+    }
+  }
+  User.init(
+    {
+      _id: {
+        type: DataTypes.STRING,
+        primaryKey: true,
+      },
+      NIC: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: true,
+      },
+      DLN: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: true,
+      },
+      address: {
+        type: DataTypes.STRING,
+        allowNull: false,
       },
     },
-    password: {
-      type: String,
-      required: [true, "Must not be empty"],
-    },
-    role: {
-      type: String,
-      required: [true, "Must not be empty"],
-      enum: ["user", "admin"],
-    },
-    firstName: {
-      type: String,
-      required: [true, "Must not be empty"],
-    },
-    lastName: {
-      type: String,
-      required: [true, "Must not be empty"],
-    },
-    dateOfBirth: {
-      type: String,
-      required: [true, "Must not be empty"],
-    },
-    NIC: {
-      type: String,
-      unique: true,
-      required: [true, "Must not be empty"],
-      validate: {
-        validator: (NIC) => NICRegEx.test(NIC),
-        message: "Not a valid NIC",
-      },
-    },
-    DLN: {
-      type: String,
-      unique: true,
-      required: [true, "Must not be empty"],
-    },
-    contactNumber: {
-      type: String,
-      unique: true,
-      required: [true, "Must not be empty"],
-      validate: {
-        validator: (contactNumber) => contactRegEx.test(contactNumber),
-        message: "Not a valid contact number",
-      },
-    },
-    address: {
-      type: String,
-      required: [true, "Must not be empty"],
-    },
-    isBlacklisted: {
-      type: Boolean,
-      required: true,
-      default: false,
-    },
-    isPremiumCustomer: {
-      type: Boolean,
-      required: true,
-      default: false,
-    },
-    isVerified: {
-      type: Boolean,
-      required: true,
-      default: false,
-    },
-    licenseImageURL: {
-      type: String,
-    },
-    alternateIDImageURL: {
-      type: String,
-    },
-    userImageURL: {
-      type: String,
-    },
-  },
-  { timestamps: true }
-);
-
-const User = model("User", userSchema);
-
-module.exports = User;
+    {
+      sequelize,
+      tableName: "user",
+      modelName: "User",
+      timestamps: false,
+    }
+  );
+  return User;
+};

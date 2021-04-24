@@ -1,9 +1,9 @@
 const csv = require("csv-parser");
 const fs = require("fs");
 const moment = require("moment");
-const Offence = require("../models/offence");
-const User = require("../models/user");
-const Rent = require("../models/rent");
+const Offence = require("../mdb_models/offence");
+const User = require("../mdb_models/user");
+const Rent = require("../mdb_models/rent");
 const { forEach } = require("p-iteration");
 
 //Sync offence table with CSV provided by DMV

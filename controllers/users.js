@@ -3,7 +3,8 @@ const { request, response } = require("express");
 const jwt = require("jsonwebtoken");
 
 const { JWT_SECRET } = require("../config/env.json");
-const User = require("../models/user");
+const { sequelize, User: SqlUser } = require("../models");
+const User = require("../mdb_models/user");
 
 const { generateUserDataErrors } = require("../utils/validators");
 
@@ -45,6 +46,13 @@ exports.signup = async (request, response) => {
 
     //Create new user object in database
     const user = await User.create(new_user);
+
+    await SqlUser.create({
+      _id: user._id.toString(),
+      NIC: user.NIC,
+      address: user.address,
+      DLN: user.DLN,
+    });
 
     const email = user.email;
 

@@ -1,7 +1,7 @@
 const { request, response } = require("express");
 const moment = require("moment");
-const Equipment = require("../models/equipment");
-const Rent = require("../models/rent");
+const Equipment = require("../mdb_models/equipment");
+const Rent = require("../mdb_models/rent");
 
 exports.addEquipment = async (request, response) => {
   //create new equipment from request

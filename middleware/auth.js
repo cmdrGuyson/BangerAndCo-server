@@ -1,7 +1,7 @@
 const jwt = require("jsonwebtoken");
 const { JWT_SECRET } = require("../config/env.json");
 
-const User = require("../models/user");
+const User = require("../mdb_models/user");
 
 module.exports = (admin) => async (request, response, next) => {
   let token;

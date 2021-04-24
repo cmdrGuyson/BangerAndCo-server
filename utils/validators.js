@@ -1,6 +1,6 @@
-const User = require("../models/user");
-const Vehicle = require("../models/vehicle");
-const Rent = require("../models/rent");
+const User = require("../mdb_models/user");
+const Vehicle = require("../mdb_models/vehicle");
+const Rent = require("../mdb_models/rent");
 const moment = require("moment");
 
 //Used to create error object if invalid data types are sent to update user data
