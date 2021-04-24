@@ -37,6 +37,7 @@ const {
   deleteVehicle,
   getAvailableVehicles,
   getPrices,
+  toggleAvailability,
 } = require("./controllers/vehicles");
 
 //Import equipment controllers
@@ -93,6 +94,7 @@ app.post("/vehicle-image/:id", auth("admin"), uploadVehicleImage); //Upload vehi
 app.delete("/vehicle/:id", auth("admin"), deleteVehicle); //Delete vehicle
 app.get("/available-vehicles/:pickupDate/:dropoffDate", getAvailableVehicles); //Get all available vehicles in a selected time period
 app.get("/prices", getPrices); //Scrape and get referencial pricing
+app.get("/vehicle-availability/:id", auth("admin"), toggleAvailability); //Change availability of vehicle
 
 /* EQUIPMENT ROUTES */
 app.post("/equipment", auth("admin"), addEquipment); //Add equipment to the system
@@ -127,7 +129,7 @@ if (ENV !== "TESTING") {
 if (ENV !== "TESTING") {
   const rule = new schedule.RecurrenceRule();
   rule.hour = 18;
-  rule.minute = 00;
+  rule.minute = 30;
   rule.tz = process.env.TIME_ZONE;
 
   const job = schedule.scheduleJob(rule, function () {

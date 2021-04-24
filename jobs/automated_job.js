@@ -49,13 +49,14 @@ exports.syncUnclaimedRents = async () => {
   try {
     console.log("---SYNCING UNCLAIMED RENTS---");
 
+    //Get all pending rents
     const rents = await Rent.find({ status: "pending" }).populate("user");
 
     await forEach(rents, async (rent) => {
       const today = moment();
       const pickup = moment(rent.rentedFrom);
 
-      //If there are any unclaimed pickups
+      //If there are any unclaimed pickups for today
       if (pickup.isSameOrBefore(today, "day")) {
         //Set rent status as returned
         rent.status = "returned";

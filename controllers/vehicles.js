@@ -28,6 +28,11 @@ exports.addVehicle = async (request, response) => {
       vehicleNumber: new_vehicle.vehicleNumber,
     });
 
+    if (new_vehicle.rent < 0)
+      return response
+        .status(400)
+        .json({ error: { rent: "Invalid rent amount" } });
+
     //if vehicle number exists
     if (_vehicle)
       return response
@@ -47,8 +52,10 @@ exports.changeRent = async (request, response) => {
   let id = request.params.id;
 
   //if user input is not a number
-  if (!rent || typeof rent !== "number")
-    return response.status(400).json({ error: { message: "Invalid input" } });
+  if (!rent || typeof rent !== "number" || rent < 0)
+    return response
+      .status(400)
+      .json({ error: { message: "Invalid rent amount" } });
 
   try {
     let vehicle = await Vehicle.findById(id).orFail();
@@ -230,5 +237,28 @@ exports.getPrices = async (request, response) => {
     return response.status(200).json({ prices });
   } catch (error) {
     console.log(error);
+    return response.status(500).json({ error });
+  }
+};
+
+/* TOGGLE isAvailable PROPERTY */
+exports.toggleAvailability = async (request, response) => {
+  vehicle_id = request.params.id;
+
+  try {
+    let vehicle = await Vehicle.findById(vehicle_id);
+
+    if (!vehicle)
+      return response.status(404).json({ error: "Vehicle not found" });
+
+    vehicle.isAvailable = !vehicle.isAvailable;
+    vehicle.save();
+
+    return response
+      .status(200)
+      .json({ message: "Vehicle availability successfully changed" });
+  } catch (error) {
+    console.log(error);
+    return response.status(500).json({ error });
   }
 };

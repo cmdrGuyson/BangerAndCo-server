@@ -60,7 +60,7 @@ exports.isTimesValid = (rent_data) => {
   const dropoff_time = moment(rent_data.dropoffTime, "HH:mm");
 
   const opening_time = moment("07:59", "HH:mm");
-  const closing_time = moment("16:01", "HH:mm");
+  const closing_time = moment("18:01", "HH:mm");
 
   //Pickup and dropoff times are between working hours
   if (!pickup_time.isBetween(opening_time, closing_time)) return false;
@@ -103,7 +103,7 @@ exports.isOver25 = (birthday_string) => {
 };
 
 exports.getList = async (pickup, dropoff) => {
-  const vehicles = await Vehicle.find();
+  const vehicles = await Vehicle.find({ isAvailable: true });
 
   const unavailableVehicleIds = [];
 
