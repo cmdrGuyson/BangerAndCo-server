@@ -137,34 +137,4 @@ if (ENV !== "TESTING") {
   });
 }
 
-//DEMO
-// const OldUser = require("./mdb_models/user");
-// const { sequelize, User } = require("./models");
-// const { forEach } = require("p-iteration");
-
-// const syncDatabase = async (request, response) => {
-//   try {
-//     const users = await OldUser.find();
-//     console.log(users);
-
-//     await forEach(users, async (user) => {
-//       const result = await User.create({
-//         _id: user._id.toString(),
-//         NIC: user.NIC,
-//         address: user.address,
-//         DLN: user.DLN,
-//       });
-
-//       console.log(`[SYNCED] ${result._id}`);
-//     });
-
-//     return response.status(200).json("hi");
-//   } catch (error) {
-//     console.log(error);
-//     return response.status(500).json({ error });
-//   }
-// };
-
-// app.get("/sync", syncDatabase); //Rent a specified vehicle
-
 module.exports = http.createServer(app);
