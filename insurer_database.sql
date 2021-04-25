@@ -121,8 +121,15 @@ INSERT INTO Claim(date, claimedAmount, paidAmount, policyID, description) VALUES
 ('2020-12-02', 4000, 0, 12, null);
 
 INSERT INTO Fraud(claimID, description) VALUES
-(3, 'Mi eget mauris pharetra et ultrices neque. Rhoncus urna neque viverra justo nec ultrices dui sapien eget.'),
-(3, 'Rhoncus mattis rhoncus urna neque. Feugiat sed lectus vestibulum mattis ullamcorper velit sed. Volutpat odio facilisis mauris sit amet massa. Aliquet nibh praesent tristique magna sit amet purus gravida quis.'),
-(4, 'Euismod elementum nisi quis eleifend quam adipiscing vitae. Ultrices vitae auctor eu augue.'),
+(4, 'Mi eget mauris pharetra et ultrices neque. Rhoncus urna neque viverra justo nec ultrices dui sapien eget.'),
+(4, 'Rhoncus mattis rhoncus urna neque. Feugiat sed lectus vestibulum mattis ullamcorper velit sed. Volutpat odio facilisis mauris sit amet massa. Aliquet nibh praesent tristique magna sit amet purus gravida quis.'),
+(5, 'Euismod elementum nisi quis eleifend quam adipiscing vitae. Ultrices vitae auctor eu augue.'),
 (7, 'Nunc mi ipsum faucibus vitae aliquet nec ullamcorper sit amet.'),
 (10, 'Volutpat ac tincidunt vitae semper quis. Condimentum lacinia quis vel eros donec ac odio. Quis vel eros donec ac odio tempor.');
+
+/*View to get all fraudulent customers*/
+CREATE VIEW Fraudulent_Customers AS SELECT Customer.firstName, Customer.lastName, Customer.NIC, Customer.DLN, Customer.address, Fraud.fraudID, Fraud.description FROM Fraud JOIN Claim ON Fraud.claimID = Claim.claimID JOIN Policy ON claim.policyID = Policy.policyID JOIN Customer ON Policy.customerID = Customer.customerID;
+
+SELECT * FROM Fraudulent_Customers;
+
+GRANT SELECT ON insurerassociation.fraudulent_customers TO 'externaluser'@'localhost';
