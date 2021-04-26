@@ -114,20 +114,6 @@ app.get("/my-rents", auth(), getMyRents); //Get all rents of logged in user
 app.post("/rent-status/:id", auth("admin"), setRentStatus); //Change rent status of given rent
 app.post("/update-equipment/:id", auth(), updateRentEquipment); //Update equipment within a rent
 
-const { sequelize, FraudulentUser } = require("./models");
-
-const getFrauds = async (request, response) => {
-  try {
-    let users = await FraudulentUser.findAll();
-    console.log(users);
-    return response.json({ users });
-  } catch (error) {
-    console.log(error);
-  }
-};
-
-app.get("/frauds", getFrauds);
-
 /* SCHEDULE JOBS */
 if (ENV !== "TESTING") {
   const rule = new schedule.RecurrenceRule();

@@ -2,6 +2,7 @@ const User = require("../mdb_models/user");
 const Vehicle = require("../mdb_models/vehicle");
 const Rent = require("../mdb_models/rent");
 const moment = require("moment");
+const { sequelize, FraudulentUser } = require("../models");
 
 //Used to create error object if invalid data types are sent to update user data
 exports.generateUserDataErrors = (data) => {
@@ -134,4 +135,18 @@ exports.getList = async (pickup, dropoff) => {
   });
 
   return availableVehicles;
+};
+
+/*CHECK IF USER IS A INSUARANCE FRAUDER*/
+exports.isUserFraudulent = async (uid) => {
+  try {
+    const user = await FraudulentUser.findOne({
+      where: { _id: uid.toString() },
+    });
+    if (user) return true;
+    return false;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
 };

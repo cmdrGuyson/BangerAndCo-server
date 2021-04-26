@@ -8,7 +8,12 @@ const Rent = require("../mdb_models/rent");
 const Offence = require("../mdb_models/offence");
 const Equipment = require("../mdb_models/equipment");
 
-const { isOver25, getList, isTimesValid } = require("../utils/validators");
+const {
+  isOver25,
+  getList,
+  isTimesValid,
+  isUserFraudulent,
+} = require("../utils/validators");
 const { generateHtml } = require("../utils/mail");
 
 exports.rentVehicle = async (request, response) => {
@@ -33,12 +38,18 @@ exports.rentVehicle = async (request, response) => {
       return response.status(404).json({ error: "Vehicle not found" });
 
     //Check if user is blacklisted by DMV
-    let isBlacklisted_dmv = await handleOffences(user);
+    const isBlacklisted_dmv = await handleOffences(user);
 
     //console.log(isBlacklisted_dmv);
 
     if (isBlacklisted_dmv)
       return response.status(403).json({ error: "Blacklisted by dmv" });
+
+    // Check if the user is fraudulent
+    const isFraudulent = await isUserFraudulent(userID);
+
+    if (isFraudulent)
+      return response.status(403).json({ error: "Insurance fruad" });
 
     //Check if user is not blacklisted and is verified
     if (user.isBlacklisted)
