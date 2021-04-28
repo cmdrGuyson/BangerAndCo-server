@@ -49,7 +49,7 @@ exports.rentVehicle = async (request, response) => {
     const isFraudulent = await isUserFraudulent(userID);
 
     if (isFraudulent)
-      return response.status(403).json({ error: "Insurance fruad" });
+      return response.status(403).json({ error: "Insurance fraud" });
 
     //Check if user is not blacklisted and is verified
     if (user.isBlacklisted)
