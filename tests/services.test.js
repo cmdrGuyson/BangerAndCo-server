@@ -1,8 +1,8 @@
 const request = require("supertest");
 const app = require("../server");
 const mongoose = require("mongoose");
-const User = require("../models/user");
-const Vehicle = require("../models/vehicle");
+const User = require("../mdb_models/user");
+const Vehicle = require("../mdb_models/vehicle");
 const bcrypt = require("bcrypt");
 
 const URL = "mongodb://localhost:27017/BangerAndCoTest";

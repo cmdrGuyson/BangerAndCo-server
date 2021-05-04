@@ -76,7 +76,7 @@ exports.getAvailableEquipment = async (request, response) => {
     let activeEquipmentCounts = getCounts(activeEquipmentIds);
 
     //Get all equipments
-    const equipments = await Equipment.find();
+    const equipments = await Equipment.find({ totalAmount: { $gt: 0 } });
 
     let availableEquipment = [];
 
