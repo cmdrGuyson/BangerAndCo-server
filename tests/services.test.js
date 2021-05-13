@@ -3,11 +3,23 @@ const app = require("../server");
 const mongoose = require("mongoose");
 const User = require("../mdb_models/user");
 const Vehicle = require("../mdb_models/vehicle");
+const Offence = require("../mdb_models/offence");
 const bcrypt = require("bcrypt");
+//const mysql = require("mysql");
+const { sequelize, User: SqlUser } = require("../models");
 
 const URL = "mongodb://localhost:27017/BangerAndCoTest";
 
-let token, id, vehicle_id, rentable_vehicle_id, rent_id, equipment_id;
+let fraud_email = "fraud@email.com";
+let offender_email = "offender@email.com";
+let fraud_nic = "987776464V";
+let offender_nic = "987776999V";
+let fraud_dln = "B434343888";
+let offender_dln = "B434343999";
+let fraud_id, offender_id;
+let address = "16B/3, Abstern Avn";
+
+let token, id, vehicle_id, rentable_vehicle_id, rent_id, equipment_id, password;
 
 beforeAll((done) => {
   //Create test database and add users, vehicles
@@ -20,7 +32,8 @@ beforeAll((done) => {
     .then(() => {
       return bcrypt.hash("password", 6);
     })
-    .then((password) => {
+    .then((pass) => {
+      password = pass;
       User.create({
         firstName: "Guyson",
         lastName: "Kuruppu",
@@ -31,7 +44,52 @@ beforeAll((done) => {
         dateOfBirth: "11/09/1998",
         contactNumber: "0717463849",
         role: "admin",
-        address: "16B/3, Abstern Avn",
+        address,
+      });
+    })
+    .then(() => {
+      //CREATE FRAUD USER
+      return User.create({
+        firstName: "Fraud",
+        lastName: "User",
+        email: fraud_email,
+        password,
+        NIC: fraud_nic,
+        DLN: fraud_dln,
+        dateOfBirth: "11/09/1998",
+        contactNumber: "0776766885",
+        role: "user",
+        address,
+        isVerified: true,
+      });
+    })
+    .then((user) => {
+      fraud_id = user._id;
+    })
+    .then(() => {
+      //CREATE OFFENDER USER
+      return User.create({
+        firstName: "Offender",
+        lastName: "User",
+        email: offender_email,
+        password,
+        NIC: offender_nic,
+        DLN: offender_dln,
+        dateOfBirth: "11/09/1998",
+        contactNumber: "0776766995",
+        role: "user",
+        address,
+        isVerified: true,
+      });
+    })
+    .then((user) => {
+      offender_id = user._id;
+    })
+    .then(() => {
+      Offence.create({
+        dateTimeReported: "2021-03-17T12:00:00.000+00:00",
+        DLN: offender_dln,
+        offence: "Speeding",
       });
     })
     .then(() => {
@@ -58,6 +116,22 @@ beforeAll((done) => {
     })
     .then((result) => {
       rentable_vehicle_id = result._id;
+    })
+    .then(() => {
+      SqlUser.create({
+        _id: fraud_id.toString(),
+        NIC: fraud_nic,
+        address,
+        DLN: fraud_dln,
+      });
+    })
+    .then(() => {
+      SqlUser.create({
+        _id: offender_id.toString(),
+        NIC: offender_nic,
+        address,
+        DLN: offender_dln,
+      });
     })
     .catch((error) => {
       console.log(error);
@@ -158,7 +232,7 @@ describe("User Endpoints", () => {
       .set("Authorization", "Bearer " + token);
     expect(response.statusCode).toEqual(200);
     expect(response.body).toHaveProperty("users");
-    expect(response.body.users.length).toBe(2);
+    expect(response.body.users.length).toBe(4);
   });
 
   it("Change user status", async () => {
@@ -379,15 +453,57 @@ describe("Equipment Endpoints", () => {
   });
 });
 
+describe("Evaluate Integrations", () => {
+  let offender_token, fraud_token;
+
+  it("Block rent attempt by offender", async () => {
+    const _response = await request(app).post("/login").send({
+      email: offender_email,
+      password: "password",
+    });
+    expect(_response.statusCode).toEqual(200);
+    expect(_response.body).toHaveProperty("token");
+    offender_token = _response.body.token;
+
+    //Try to rent vehicle
+    const response = await request(app)
+      .post(`/rent/${rentable_vehicle_id}`)
+      .set("Authorization", "Bearer " + offender_token)
+      .send({
+        pickupDate: "2021-05-28",
+        dropoffDate: "2021-05-30",
+        pickupTime: "15:00",
+        dropoffTime: "16:00",
+      });
+    console.log(response.body);
+    expect(response.statusCode).toEqual(403);
+    expect(response.body.error).toEqual("Blacklisted by dmv");
+  });
+
+  it("Offender is blacklisted after failed rent attempt", async () => {
+    const response = await request(app)
+      .get("/user")
+      .set("Authorization", "Bearer " + offender_token);
+    expect(response.statusCode).toEqual(200);
+    expect(response.body.isBlacklisted).toEqual(true);
+  });
+});
+
 afterAll(async (done) => {
   // Clearing test database and closing connection
   try {
     await mongoose.connection.db.dropDatabase();
     await mongoose.connection.close();
+
+    await SqlUser.destroy({
+      where: { NIC: [fraud_nic, offender_nic, "987469377V"] },
+    });
+
     done();
   } catch (error) {
     console.log(error);
     done();
   }
+
   app.close();
 });

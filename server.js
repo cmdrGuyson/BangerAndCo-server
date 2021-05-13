@@ -9,7 +9,7 @@ const schedule = require("node-schedule");
 
 const auth = require("./middleware/auth");
 
-const ENV = "DEV";
+const ENV = "TESTING";
 
 //Import user controllers
 const {
@@ -117,8 +117,8 @@ app.post("/update-equipment/:id", auth(), updateRentEquipment); //Update equipme
 /* SCHEDULE JOBS */
 if (ENV !== "TESTING") {
   const rule = new schedule.RecurrenceRule();
-  rule.hour = 0;
-  rule.minute = 1;
+  rule.hour = 18;
+  rule.minute = 38;
   rule.tz = process.env.TIME_ZONE;
 
   const job = schedule.scheduleJob(rule, function () {

@@ -294,11 +294,18 @@ const handleOffences = async (user) => {
     });
 
     //Generate and send email
+    let userImageFilename = user.userImageURL
+      ? user.userImageURL.slice(28)
+      : null;
+    let licenseFilename = user.licenseImageURL
+      ? user.licenseImageURL.slice(31)
+      : null;
+
     const data = {
       userImageUrl: user.userImageURL,
-      userImageFilename: user.userImageURL.slice(28),
+      userImageFilename,
       licenseImageUrl: user.licenseImageURL,
-      licenseFilename: user.licenseImageURL.slice(31),
+      licenseFilename,
       name: `${user.firstName} ${user.lastName}`,
       DLN: offence.DLN,
       offence: offence.offence,
@@ -361,5 +368,3 @@ const handleOffences = async (user) => {
 
   return true;
 };
-
-//handleOffences("5fad849abd8c5a2cf44f1a83");
