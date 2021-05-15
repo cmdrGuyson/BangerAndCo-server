@@ -130,6 +130,5 @@ INSERT INTO Fraud(claimID, description) VALUES
 /*View to get all fraudulent customers*/
 CREATE VIEW Fraudulent_Customers AS SELECT Customer.firstName, Customer.lastName, Customer.NIC, Customer.DLN, Customer.address, Fraud.fraudID, Fraud.description FROM Fraud JOIN Claim ON Fraud.claimID = Claim.claimID JOIN Policy ON claim.policyID = Policy.policyID JOIN Customer ON Policy.customerID = Customer.customerID;
 
-SELECT * FROM Fraudulent_Customers;
-
+/*Grant access*/
 GRANT SELECT ON insurerassociation.fraudulent_customers TO 'externaluser'@'localhost';

@@ -117,8 +117,8 @@ app.post("/update-equipment/:id", auth(), updateRentEquipment); //Update equipme
 /* SCHEDULE JOBS */
 if (ENV !== "TESTING") {
   const rule = new schedule.RecurrenceRule();
-  rule.hour = 18;
-  rule.minute = 38;
+  rule.hour = 12;
+  rule.minute = 5;
   rule.tz = process.env.TIME_ZONE;
 
   const job = schedule.scheduleJob(rule, function () {

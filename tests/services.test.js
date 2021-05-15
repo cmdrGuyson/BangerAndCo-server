@@ -14,7 +14,7 @@ let fraud_email = "fraud@email.com";
 let offender_email = "offender@email.com";
 let fraud_nic = "987776464V";
 let offender_nic = "987776999V";
-let fraud_dln = "B434343888";
+let fraud_dln = "B54545454";
 let offender_dln = "B434343999";
 let fraud_id, offender_id;
 let address = "16B/3, Abstern Avn";
@@ -480,12 +480,60 @@ describe("Evaluate Integrations", () => {
     expect(response.body.error).toEqual("Blacklisted by dmv");
   });
 
-  it("Offender is blacklisted after failed rent attempt", async () => {
+  it("Offender is blacklisted after failed rent attempt by offender", async () => {
     const response = await request(app)
       .get("/user")
       .set("Authorization", "Bearer " + offender_token);
     expect(response.statusCode).toEqual(200);
     expect(response.body.isBlacklisted).toEqual(true);
+  });
+
+  it("Rent has not been made after failed rent attempt by offender", async () => {
+    const response = await request(app)
+      .get("/my-rents")
+      .set("Authorization", "Bearer " + offender_token);
+    expect(response.statusCode).toEqual(200);
+    expect(response.body.rents.length).toBe(0);
+  });
+
+  it("Block rent attempt by fraudant user", async () => {
+    const _response = await request(app).post("/login").send({
+      email: fraud_email,
+      password: "password",
+    });
+    expect(_response.statusCode).toEqual(200);
+    expect(_response.body).toHaveProperty("token");
+    fraud_token = _response.body.token;
+
+    //Try to rent vehicle
+    const response = await request(app)
+      .post(`/rent/${rentable_vehicle_id}`)
+      .set("Authorization", "Bearer " + fraud_token)
+      .send({
+        pickupDate: "2021-05-28",
+        dropoffDate: "2021-05-30",
+        pickupTime: "15:00",
+        dropoffTime: "16:00",
+      });
+    console.log(response.body);
+    expect(response.statusCode).toEqual(403);
+    expect(response.body.error).toEqual("Insurance fraud");
+  });
+
+  it("Rent has not been made after failed rent attempt by frauder", async () => {
+    const response = await request(app)
+      .get("/my-rents")
+      .set("Authorization", "Bearer " + fraud_token);
+    expect(response.statusCode).toEqual(200);
+    expect(response.body.rents.length).toBe(0);
+  });
+
+  it("Scrape referential pricing", async () => {
+    const response = await request(app)
+      .get("/prices")
+      .set("Authorization", "Bearer " + token);
+    expect(response.statusCode).toEqual(200);
+    expect(response.body.prices.length).toBeGreaterThan(0);
   });
 });
 
@@ -496,7 +544,7 @@ afterAll(async (done) => {
     await mongoose.connection.close();
 
     await SqlUser.destroy({
-      where: { NIC: [fraud_nic, offender_nic, "987469377V"] },
+      where: { NIC: [offender_nic, fraud_nic, "987469377V"] },
     });
 
     done();
