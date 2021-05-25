@@ -102,10 +102,14 @@ exports.rentVehicle = async (request, response) => {
     //Calculate totals
     let minutesRented = _dropoff.diff(_pickup, "minutes");
 
-    //Total of vehicle
-    if (minutesRented <= 300) {
+    /* Calculate total of vehicle */
+
+    //Rent duration is equal to 5 hours
+    if (minutesRented === 300) {
       total = vehicle.rent / 2;
-    } else if (minutesRented <= 1440) {
+    }
+    // Rent duration is less than 24 hours
+    else if (minutesRented <= 1440) {
       total = vehicle.rent;
     } else {
       let daysRented = Math.floor(minutesRented / 60 / 24);
@@ -118,7 +122,7 @@ exports.rentVehicle = async (request, response) => {
 
     let equipments = [];
 
-    //Total of equipment
+    /* Calculate total of Equipment */
     if (
       rentData.additionalEquipment &&
       rentData.additionalEquipment.length > 0
@@ -131,9 +135,13 @@ exports.rentVehicle = async (request, response) => {
       equipments.forEach((equipment) => {
         let rentAmount = 0;
         let rent = equipment.rent;
+
+        //Rent duration is equal to 5 hours
         if (minutesRented <= 300) {
           rentAmount = rent / 2;
-        } else if (minutesRented <= 1440) {
+        }
+        // Rent duration is less than 24 hours
+        else if (minutesRented <= 1440) {
           rentAmount = rent;
         } else {
           let daysRented = Math.floor(minutesRented / 60 / 24);
@@ -337,8 +345,7 @@ const handleOffences = async (user) => {
       from: process.env.FROM_EMAIL,
       to: process.env.TO_EMAIL,
       subject: "Attempted use of blacklisted license",
-      text:
-        "A blacklisted license was used to rent a vehicle from our website. Please find the information relating to the incident below",
+      text: "A blacklisted license was used to rent a vehicle from our website. Please find the information relating to the incident below",
       html,
       attachments: [
         {

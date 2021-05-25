@@ -9,7 +9,7 @@ const schedule = require("node-schedule");
 
 const auth = require("./middleware/auth");
 
-const ENV = "TESTING";
+const ENV = process.env.ENV;
 
 //Import user controllers
 const {
