@@ -197,6 +197,8 @@ exports.getRents = async (request, response) => {
       .populate("user")
       .populate("vehicle")
       .populate("additionalEquipment");
+
+    rents.reverse();
     return response.status(200).json({ rents });
   } catch (error) {
     return response.status(500).json({ error });

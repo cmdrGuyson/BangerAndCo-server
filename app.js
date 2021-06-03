@@ -21,7 +21,7 @@ server.listen(port, () => {
       sequelize.authenticate();
     })
     .then(() => {
-      console.log("Connected to secondary database");
+      console.log("Connected to secondary database!");
     })
     .catch((error) => {
       console.log(error);
