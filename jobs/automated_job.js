@@ -5,43 +5,43 @@ const Offence = require("../mdb_models/offence");
 const User = require("../mdb_models/user");
 const Rent = require("../mdb_models/rent");
 const { forEach } = require("p-iteration");
+const getCSV = require("get-csv");
 
 //Sync offence table with CSV provided by DMV
 exports.syncDmvLicenses = async () => {
   console.log("---SYNCING BLACKLISTED LICENSES---");
 
-  //Clear collection
-  await Offence.deleteMany();
+  try {
+    //Clear collection
+    await Offence.deleteMany();
 
-  fs.createReadStream("./data/dmv.csv")
-    .pipe(csv())
-    .on("data", async (row) => {
-      try {
-        //Convert date and time to date/time format
-        const _dateTimeReported = moment(
-          `${row.date} ${row.time}`,
-          "DD/MM/YYYY HH:mm"
-        );
+    //Get data rows from csv as json
+    let rows = await getCSV("http://localhost:5000/dmv.csv");
 
-        const dateTimeReported = _dateTimeReported.format();
+    await forEach(rows, async (row) => {
+      //Convert date and time to date/time format
+      const _dateTimeReported = moment(
+        `${row.date} ${row.time}`,
+        "DD/MM/YYYY HH:mm"
+      );
 
-        let data = {
-          dateTimeReported,
-          DLN: row.licenseNumber,
-          offence: row.offence,
-        };
+      const dateTimeReported = _dateTimeReported.format();
 
-        //Save offence
-        let result = await Offence.create(data);
+      let data = {
+        dateTimeReported,
+        DLN: row.licenseNumber,
+        offence: row.offence,
+      };
 
-        console.log(`[INFO] Saved entry ${result.DLN}`);
-      } catch (error) {
-        console.log(error);
-      }
-    })
-    .on("end", () => {
-      console.log("CSV file successfully processed");
+      //Save offence
+      let result = await Offence.create(data);
+
+      console.log(`[INFO] Saved entry ${result.DLN}`);
     });
+    console.log("CSV file successfully processed");
+  } catch (error) {
+    console.log(error);
+  }
 };
 
 //Check if there are any unclaimed rents and blacklist users failed to pickup rented vehicles
