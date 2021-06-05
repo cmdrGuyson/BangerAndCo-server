@@ -95,7 +95,7 @@ exports.rentVehicle = async (request, response) => {
     }
 
     //Check if vehicle can be insured for user
-    const isInsured = isOver25(user.dateOfBirth);
+    const isInsured = isOver25(user.dateOfBirth) || vehicle.type === "town-car";
 
     let total = 0;
 
